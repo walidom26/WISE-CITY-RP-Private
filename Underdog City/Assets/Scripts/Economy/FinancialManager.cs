@@ -72,7 +72,7 @@ namespace UnderdogCity
 
         public void CreateP2PListing(string seller, string type, string name, double price)
         {
-            string id = "P2P-" + Random.Range(1000, 9999);
+            string id = "P2P-" + UnityEngine.Random.Range(1000, 9999);
             p2pMarketplace.Add(new P2PListing
             {
                 listingID = id,
