@@ -1,21 +1,19 @@
-# ☁️ دليل البناء السحابي المباشر لبناء نسخة الأندرويد (APK) عبر GitHub Actions
+# ☁️ دليل البناء السحابي المباشر وبناء نسخة الأندرويد (APK) عبر GitHub Actions
 
-يوفر هذا المشروع نظام بناء سحابي مباشر ومتحقق منه بالكامل لاستخراج ملفات التطبيق (APK) للعبة **Wise City RP** تلقائياً عبر **GameCI** و **GitHub Actions** دون الحاجة لأي خطوات تفعيل يدوية أو ملفات `.alf`.
+يوفر هذا المشروع نظام بناء سحابي مباشر ومتحقق منه بالكامل لاستخراج ملفات التطبيق (APK) للعبة **Wise City RP** تلقائياً عبر **GameCI** و **GitHub Actions** باستخدام الترخيص الشخصي المجاني (Personal / Community License)، دون الحاجة لأي أرقام تسلسلية مدفوعة (Serials) أو ملفات تفعيل يدوية (`.alf`).
 
 ---
 
-## 1️⃣ آلية البناء السحابي التلقائي المباشر (Direct Automated Cloud Build)
+## 1️⃣ آلية البناء السحابي المباشر بالترخيص المجاني
 
-تم إعداد workflow في `.github/workflows/build.yml` للقيام بعملية التسجيل والبناء والتجميع بشكل آلي ومباشر.
+تم إعداد workflow في `.github/workflows/build.yml` للبناء التلقائي عبر خوادم GitHub.
 
 ### الأسرار المطلوبة في GitHub Repository Secrets:
 
 قم بإضافة الأسرار التالية في إعدادات المستودع (`Settings -> Secrets and variables -> Actions`):
 
-1. **`UNITY_LICENSE`**: نص ترخيص يونيتي (Personal License أو Professional License ULF/XML).
-2. **`UNITY_EMAIL`** و **`UNITY_PASSWORD`**: بيانات حساب Unity للتسجيل والتفعيل الآلي مباشرة في سيرفر البناء.
-3. **`UNITY_SERIAL`** *(اختياري)*: الرقم التسلسلي لترخيص Unity Plus / Pro / Enterprise.
-4. **`UNITY_LICENSING_SERVER`** *(اختياري)*: عنوان سيرفر التراخيص الخاص بالشركات والمؤسسات.
+1. **`UNITY_EMAIL`** و **`UNITY_PASSWORD`**: بيانات حساب Unity الخاص بك لاستخراج الترخيص المجاني وتفعيله سحابياً تلقائياً.
+2. **`UNITY_LICENSE`** *(اختياري)*: نص ترخيص يونيتي المجاني الشخصي (Personal ULF).
 
 ---
 
