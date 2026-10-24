@@ -34,6 +34,20 @@ namespace UnderdogCity
         [HideInInspector]
         public CarState State;
 
+        [Header("تصنيف جودة السيارة والطلاء")]
+        public VehicleManager.VehicleTier vehicleTier = VehicleManager.VehicleTier.Common;
+        public MeshRenderer bodyMeshRenderer;
+
+        [Header("نظام الوقود (Fuel System)")]
+        public float fuelAmount = 100f;
+        public float maxFuel = 100f;
+        public float fuelConsumptionRate = 0.5f; // استهلاك الوقود لكل دقيقة قيادة
+
+        [Header("نظام الضرر والاصطدام (Damage & Smoke)")]
+        public float vehicleHealth = 100f;
+        public ParticleSystem smokeEffect;
+        public GameObject[] glassWindows;
+
         [Header("قائمة العجلات والإطارات")]
         public WheelInfo[] Wheels;
 
@@ -57,13 +71,27 @@ namespace UnderdogCity
 
         void FixedUpdate()
         {
+            // استهلاك الوقود عند الحركة
+            if (State == CarState.OCCUPIED && Mathf.Abs(Input.Forward) > 0.05f)
+            {
+                if (fuelAmount > 0)
+                {
+                    fuelAmount -= fuelConsumptionRate * Time.fixedDeltaTime / 60f;
+                }
+                else
+                {
+                    fuelAmount = 0f;
+                    Input.Forward = 0f; // توقف المحرك عند نفاد البنزين
+                }
+            }
+
             // تطبيق قوة المحرك والتوجيه ودوران العجلات
             for(int i = 0; i < Wheels.Length; i++)
             {
                 if (Wheels[i].WheelCollider != null)
                 {
                     if (Wheels[i].Motor)
-                        Wheels[i].WheelCollider.motorTorque = Input.Forward * MotorPower;
+                        Wheels[i].WheelCollider.motorTorque = (fuelAmount > 0 ? Input.Forward : 0) * MotorPower;
                     if (Wheels[i].Steer)
                         Wheels[i].WheelCollider.steerAngle = Input.Steer * SteerAngle;
 
@@ -84,6 +112,27 @@ namespace UnderdogCity
             {
                 Rigidbody.position = Vector3.MoveTowards(Rigidbody.position, Network.Position, Time.fixedDeltaTime);
                 Rigidbody.rotation = Quaternion.RotateTowards(Rigidbody.rotation, Network.Rotation, Time.fixedDeltaTime * 90f);
+            }
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            float impactForce = collision.relativeVelocity.magnitude;
+            if (impactForce > 5f)
+            {
+                vehicleHealth -= impactForce * 2f;
+                if (vehicleHealth < 40f && smokeEffect != null && !smokeEffect.isPlaying)
+                {
+                    smokeEffect.Play();
+                }
+
+                if (vehicleHealth < 20f && glassWindows != null)
+                {
+                    foreach (var glass in glassWindows)
+                    {
+                        if (glass != null) glass.SetActive(false); // انكسار الزجاج
+                    }
+                }
             }
         }
 
@@ -115,7 +164,7 @@ namespace UnderdogCity
 
                 sfriction.extremumValue = 1f;
                 sfriction.asymptoteValue = Wheels[i].WheelCollider.sidewaysFriction.extremumValue * KeepGrip * 0.998f + 0.002f;
-                sfriction.extremumSlip = 0.5f;
+                sfriction.extremumValue = 1f;
                 sfriction.asymptoteSlip = 1f;
                 sfriction.stiffness = Grip;
 
@@ -134,6 +183,8 @@ namespace UnderdogCity
                 stream.SendNext(Input.Forward);
                 stream.SendNext(Input.Steer);
                 stream.SendNext(State);
+                stream.SendNext(fuelAmount);
+                stream.SendNext(vehicleHealth);
                 
                 stream.SendNext(Rigidbody.position);
                 stream.SendNext(Rigidbody.rotation);
@@ -145,6 +196,8 @@ namespace UnderdogCity
                 Input.Forward = (float)stream.ReceiveNext();
                 Input.Steer = (float)stream.ReceiveNext();
                 State = (CarState)stream.ReceiveNext();
+                fuelAmount = (float)stream.ReceiveNext();
+                vehicleHealth = (float)stream.ReceiveNext();
 
                 Network.Position = (Vector3)stream.ReceiveNext();
                 Network.Rotation = (Quaternion)stream.ReceiveNext();

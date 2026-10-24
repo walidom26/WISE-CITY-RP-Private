@@ -69,7 +69,7 @@ namespace UnderdogCity
         {
             ForensicEvidence ev = new ForensicEvidence
             {
-                evidenceID = "EVID-" + Random.Range(10000, 99999),
+                evidenceID = "EVID-" + UnityEngine.Random.Range(10000, 99999),
                 location = position,
                 suspectPlayerID = suspectID,
                 fingerprintHash = fingerprint,

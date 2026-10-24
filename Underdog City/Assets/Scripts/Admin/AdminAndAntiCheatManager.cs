@@ -94,7 +94,7 @@ namespace UnderdogCity
         {
             if (PhotonNetwork.LocalPlayer != null && PhotonNetwork.LocalPlayer.ActorNumber == targetPlayerID)
             {
-                Controller ctrl = GetComponent<Controller>();
+                MonoBehaviour ctrl = GetComponent<Controller>();
                 if (ctrl != null) ctrl.enabled = !freeze;
                 Debug.Log("[WiseCity Admin] You have been " + (freeze ? "FROZEN" : "UNFROZEN") + " by an admin.");
             }
