@@ -5,7 +5,7 @@ on:
 
 jobs:
   buildAndroid:
-    name: Build Wise City RP for Android (APK)
+    name: Direct Automated Android APK Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,17 +22,19 @@ jobs:
             Library-UnderdogCity-Android-
             Library-UnderdogCity-
 
-      - name: Build Android APK
+      - name: Build Android APK (Automated Licensing)
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
           projectPath: "Underdog City"
           unityVersion: 2018.3.0f2
           targetPlatform: Android
           androidExportType: androidPackage
+          unityLicensingServer: ${{ secrets.UNITY_LICENSING_SERVER }}
 
       - name: Upload Android APK Artifact
         uses: actions/upload-artifact@v4
