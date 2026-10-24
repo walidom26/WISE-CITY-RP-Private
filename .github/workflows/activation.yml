@@ -14,6 +14,8 @@ jobs:
       - name: Request activation file
         id: getActivationFile
         uses: game-ci/unity-request-activation-file@v2
+        with:
+          unityVersion: 2018.3.0f2
 
       - name: Upload activation file artifact (.alf)
         uses: actions/upload-artifact@v4
