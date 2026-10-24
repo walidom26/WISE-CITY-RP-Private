@@ -157,7 +157,7 @@ namespace UnderdogCity
                 var sfriction = Wheels[i].WheelCollider.sidewaysFriction;
 
                 ffriction.asymptoteValue = Wheels[i].WheelCollider.forwardFriction.extremumValue * KeepGrip * 0.998f + 0.002f;
-                sfriction.extremumValue = 1f;
+            sfriction.extremumSlip = 0.5f;
                 ffriction.extremumSlip = 1f;
                 ffriction.asymptoteSlip = 2f;
                 ffriction.stiffness = Grip;
