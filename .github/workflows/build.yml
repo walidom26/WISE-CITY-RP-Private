@@ -5,7 +5,7 @@ on:
 
 jobs:
   buildAndroid:
-    name: Automated Android APK Build (Automated Unity Login & Build)
+    name: Automated Android APK Build (Automated Login)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,7 +22,7 @@ jobs:
             Library-UnderdogCity-Android-
             Library-UnderdogCity-
 
-      - name: Build Android APK (Automated Login & Build)
+      - name: Build Android APK (Automated Login & License Bypass)
         uses: game-ci/unity-builder@v4
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
