@@ -5,7 +5,7 @@ on:
 
 jobs:
   buildAndroid:
-    name: Automated Android APK Build (Free Personal License)
+    name: Automated Android APK Build (Automated Personal Login)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -27,7 +27,6 @@ jobs:
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           projectPath: "Underdog City"
           unityVersion: 2018.3.0f2
