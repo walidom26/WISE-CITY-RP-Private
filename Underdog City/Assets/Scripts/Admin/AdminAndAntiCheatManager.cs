@@ -94,8 +94,8 @@ namespace UnderdogCity
         {
             if (PhotonNetwork.LocalPlayer != null && PhotonNetwork.LocalPlayer.ActorNumber == targetPlayerID)
             {
-                MonoBehaviour ctrl = GetComponent<Controller>();
-                if (ctrl != null) ctrl.enabled = !freeze;
+                PlayerMechanics mechanics = FindObjectOfType<PlayerMechanics>();
+                if (mechanics != null) mechanics.enabled = !freeze;
                 Debug.Log("[WiseCity Admin] You have been " + (freeze ? "FROZEN" : "UNFROZEN") + " by an admin.");
             }
         }
@@ -105,7 +105,8 @@ namespace UnderdogCity
         {
             if (PhotonNetwork.LocalPlayer != null && PhotonNetwork.LocalPlayer.ActorNumber == targetPlayerID)
             {
-                transform.position = destination;
+                PlayerMechanics mechanics = FindObjectOfType<PlayerMechanics>();
+                if (mechanics != null) mechanics.transform.position = destination;
                 Debug.Log("[WiseCity Admin] You have been summoned by an admin for investigation.");
             }
         }
