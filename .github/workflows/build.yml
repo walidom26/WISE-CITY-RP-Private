@@ -32,6 +32,7 @@ jobs:
         with:
           targetPlatform: Android
           projectPath: Underdog City
+          unityVersion: auto
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
