@@ -1,41 +1,39 @@
-name: Build Unity Android APK
+name: Automated Android APK Build
 
 on:
   workflow_dispatch:
 
 jobs:
-  buildAndroid:
-    name: Automated Android APK Build
+  build:
+    name: Build for Android
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          lfs: true
 
-      - name: Cache Unity Library directory
-        uses: actions/cache@v4
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
         with:
-          path: Underdog City/Library
-          key: Library-UnderdogCity-Android-${{ hashFiles('Underdog City/Assets/**', 'Underdog City/Packages/**') }}
-          restore-keys: |
-            Library-UnderdogCity-Android-
-            Library-UnderdogCity-
+          tool-cache: false
+          android: true
+          dotnet: false
+          haskell: false
+          large-packages: false
+          docker-images: false
 
-      - name: Build Android APK
-        uses: game-ci/unity-builder@v4
+      - name: Unity Login
+        uses: game-ci/unity-login@v2
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: "Underdog City"
-          unityVersion: 2018.3.0f2
-          targetPlatform: Android
-          androidExportType: androidPackage
 
-      - name: Upload Android APK Artifact
+      - name: Build Android APK
+        uses: game-ci/unity-builder@v4
+        with:
+          targetAndroid: true
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: WiseCityRP-Android-APK
+          name: build-android
           path: build/Android
-          retention-days: 14
