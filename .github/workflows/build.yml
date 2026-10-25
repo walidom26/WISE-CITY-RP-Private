@@ -27,7 +27,6 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         run: |
           echo "Authenticating Unity..."
-          # Bypass automated login action wrapper and use direct curl/auth if needed, or standard login
           echo "Credentials loaded successfully."
 
       - name: Build Android APK
@@ -38,6 +37,7 @@ jobs:
           UNITY_LICENSING_SERVER: ""
         with:
           targetAndroid: true
+          projectPath: .
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
