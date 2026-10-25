@@ -21,26 +21,17 @@ jobs:
           large-packages: false
           docker-images: false
 
-      - name: Manual Activation & Unity Login
+      - name: Unity Login
+        uses: game-ci/unity-login@v2
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        run: |
-          echo "Preparing Unity activation parameters..."
-          mkdir -p ~/.local/share/unity3d/Unity/
-          # Create a basic activation trigger using credentials
-          echo "Credentials configured for automated build."
 
       - name: Build Android APK
         uses: game-ci/unity-builder@v4
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_LICENSING_SERVER: ""
         with:
           targetPlatform: Android
           projectPath: Underdog City
-          unityVersion: auto
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
