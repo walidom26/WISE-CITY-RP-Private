@@ -29,7 +29,7 @@ namespace UnderdogCity
         private void Awake()
         {
             if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            else UnityEngine.Object.Destroy(gameObject);
         }
 
         private void Start()
@@ -111,7 +111,7 @@ namespace UnderdogCity
 
             // 5. Bottom-Center: Transparent Chat Box
             GUI.Box(new Rect(Screen.width / 2 - 200, Screen.height - 160, 400, 140), "💬 Chat Log");
-            int msgY = Screen.height - 135;
+            int msgY = (int)(Screen.height - 135);
             for (int i = Mathf.Max(0, chatNearbyMessages.Count - 4); i < chatNearbyMessages.Count; i++)
             {
                 GUI.Label(new Rect(Screen.width / 2 - 190, msgY, 380, 22), chatNearbyMessages[i]);

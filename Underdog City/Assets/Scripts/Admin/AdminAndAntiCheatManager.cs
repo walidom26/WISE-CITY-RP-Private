@@ -33,7 +33,7 @@ namespace UnderdogCity
         private void Awake()
         {
             if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            else UnityEngine.Object.Destroy(gameObject);
         }
 
         private void Start()
@@ -99,14 +99,14 @@ namespace UnderdogCity
 
         void AdminFreezeRpc(int targetPlayerID, bool freeze)
         {
-            PlayerMechanics mechanics = Object.FindObjectOfType<PlayerMechanics>();
+            PlayerMechanics mechanics = UnityEngine.Object.FindObjectOfType<PlayerMechanics>();
             if (mechanics != null) mechanics.enabled = !freeze;
             Debug.Log("[WiseCity Admin] Player ID " + targetPlayerID + (freeze ? " FROZEN" : " UNFROZEN"));
         }
 
         void AdminSummonRpc(int targetPlayerID, Vector3 destination)
         {
-            PlayerMechanics mechanics = Object.FindObjectOfType<PlayerMechanics>();
+            PlayerMechanics mechanics = UnityEngine.Object.FindObjectOfType<PlayerMechanics>();
             if (mechanics != null) mechanics.transform.position = destination;
             Debug.Log("[WiseCity Admin] Player ID " + targetPlayerID + " summoned to investigation point.");
         }

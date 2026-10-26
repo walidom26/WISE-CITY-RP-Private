@@ -23,7 +23,7 @@ namespace UnderdogCity
             }
 
             // 2. Instantiate Directional Sun Light & Ambient Lighting
-            Light sunLight = Object.FindObjectOfType<Light>();
+            Light sunLight = UnityEngine.Object.FindObjectOfType<Light>();
             if (sunLight == null)
             {
                 GameObject lightObj = new GameObject("Directional Light (Sun)");
@@ -65,14 +65,14 @@ namespace UnderdogCity
             Debug.Log("✅ Wise City RP Master Runtime Bootstrap initialized all 23 core game managers!");
         }
 
-        private static T EnsureManager<T>(string name) where T : MonoBehaviour
+        private static T EnsureManager<T>(string name) where T : MonoBehaviour, new()
         {
-            T manager = Object.FindObjectOfType<T>();
+            T manager = UnityEngine.Object.FindObjectOfType<T>();
             if (manager == null)
             {
                 GameObject obj = new GameObject("[SYSTEM] " + name);
                 manager = obj.AddComponent<T>();
-                Object.DontDestroyOnLoad(obj);
+                UnityEngine.Object.DontDestroyOnLoad(obj);
             }
             return manager;
         }

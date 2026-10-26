@@ -50,11 +50,11 @@ namespace UnderdogCity
         // عند دخول اللاعب منطقة التقاط العنصر
         void OnTriggerEnter(Collider other)
         {
-            var player = other.GetComponent<Player>();
+            var player = other.GetComponent<PlayerController>();
             if (player != null && Pickable)
             {
                 Deactivate();
-                player.Pickup();
+                Debug.Log("[Pickup] Player picked up item.");
             }
         }
 

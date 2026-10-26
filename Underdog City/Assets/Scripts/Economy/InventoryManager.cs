@@ -1,9 +1,8 @@
-using UnityEngine;
 using System.Collections.Generic;
 
 namespace UnderdogCity
 {
-    public class InventoryManager : MonoBehaviour
+    public class InventoryManager : UnityEngine.MonoBehaviour
     {
         public static InventoryManager Instance { get; private set; }
 
@@ -27,14 +26,14 @@ namespace UnderdogCity
             public double value;
         }
 
-        [Header("🎒 الحقيبة والتجارة المباشرة P2P Trade")]
+        [UnityEngine.Header("🎒 الحقيبة والتجارة المباشرة P2P Trade")]
         public List<InventoryItem> playerInventory = new List<InventoryItem>();
         public int maxInventorySlots = 20;
 
         private void Awake()
         {
             if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            else UnityEngine.Object.Destroy(gameObject);
             InitializeDefaultItems();
         }
 
@@ -59,7 +58,7 @@ namespace UnderdogCity
             {
                 playerInventory.Add(new InventoryItem
                 {
-                    itemID = Random.Range(100, 999),
+                    itemID = UnityEngine.Random.Range(100, 999),
                     itemName = name,
                     type = type,
                     quantity = qty,
@@ -67,7 +66,7 @@ namespace UnderdogCity
                 });
             }
 
-            Debug.Log(string.Format("[INVENTORY] Added {0} x{1} to inventory.", name, qty));
+            UnityEngine.Debug.Log(string.Format("[INVENTORY] Added {0} x{1} to inventory.", name, qty));
             return true;
         }
 
@@ -75,7 +74,7 @@ namespace UnderdogCity
         {
             if (item == null || item.quantity <= 0 || price < 0) return false;
 
-            Debug.Log(string.Format("[SECURE TRADE] Sold {0} to Buyer {1} for ${2}", item.itemName, buyerAccountID, price));
+            UnityEngine.Debug.Log(string.Format("[SECURE TRADE] Sold {0} to Buyer {1} for ${2}", item.itemName, buyerAccountID, price));
             item.quantity--;
             if (item.quantity <= 0) playerInventory.Remove(item);
             return true;

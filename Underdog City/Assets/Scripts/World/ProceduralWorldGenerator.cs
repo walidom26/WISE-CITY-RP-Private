@@ -29,7 +29,7 @@ namespace UnderdogCity
         private void Awake()
         {
             if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            else UnityEngine.Object.Destroy(gameObject);
         }
 
         private void Start()
@@ -95,11 +95,11 @@ namespace UnderdogCity
                     }
                     else
                     {
-                        int districtIndex = Mathf.Abs((x * 3 + z * 7)) % DistrictNames.Length;
+                        int districtIndex = System.Math.Abs(x * 3 + z * 7) % DistrictNames.Length;
                         GameObject building = GameObject.CreatePrimitive(PrimitiveType.Cube);
                         building.name = string.Format("Building_{0}_{1}_[{2}]", x, z, DistrictNames[districtIndex]);
 
-                        float buildingHeight = Random.Range(15f, 75f);
+                        float buildingHeight = UnityEngine.Random.Range(15f, 75f);
                         building.transform.position = pos + new Vector3(0, buildingHeight / 2f, 0);
                         building.transform.localScale = new Vector3(36f, buildingHeight, 36f);
 
@@ -217,7 +217,7 @@ namespace UnderdogCity
 
         public string GetDistrictAtPosition(Vector3 pos)
         {
-            int index = Mathf.Abs((int)(pos.x * 0.01f + pos.z * 0.03f)) % DistrictNames.Length;
+            int index = System.Math.Abs((int)(pos.x * 0.01f + pos.z * 0.03f)) % DistrictNames.Length;
             return DistrictNames[index];
         }
     }
