@@ -1,37 +1,26 @@
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
-using Photon.Pun;
 
 namespace UnderdogCity
 {
-    public class WiseProSmartphone : MonoBehaviourPunCallbacks
+    public class WiseProSmartphone : MonoBehaviour
     {
         public static WiseProSmartphone Instance { get; private set; }
 
-        public enum SmartphoneApp
+        public enum PhoneApp
         {
-            Home,          // القائمة الرئيسية
-            CentralBank,   // البنك المركزي
-            MapGPS,        // الخريطة والـ GPS
-            Marketplace,   // سوق البيع والشراء P2P
-            ChirperSocial, // تطبيق Chirper
-            VoiceAndSMS    // المكالمات والرسائل
+            CentralBank,
+            GPSMap,
+            MarketP2P,
+            Chirper,
+            CallsSMS
         }
 
-        [System.Serializable]
-        public class ChirperPost
-        {
-            public string authorName;
-            public string messageText;
-            public string timestampString;
-        }
+        [Header("📱 هاتف وايز برود الذكي - WisePro Smartphone")]
+        public bool isPhoneOpen = false;
+        public PhoneApp activeApp = PhoneApp.CentralBank;
 
-        [Header("7️⃣ هاتف WisePro الذكي - وايز سيتي")]
-        public GameObject phoneUIFrame;
-        public SmartphoneApp currentApp = SmartphoneApp.Home;
-        public List<ChirperPost> socialFeed = new List<ChirperPost>();
+        private List<string> blockedNumbers = new List<string>();
 
         private void Awake()
         {
@@ -39,56 +28,35 @@ namespace UnderdogCity
             else Destroy(gameObject);
         }
 
-        private void Start()
+        public void TogglePhoneUI()
         {
-            Debug.Log("[WiseCity Smartphone] WisePro Smartphone OS initialized.");
-            PostChirperMessage("WiseCityNews", "أهلاً بكم في تطبيق Chirper الرسمي لمدينة Wise City!");
+            isPhoneOpen = !isPhoneOpen;
+            Debug.Log("[WisePro Phone] UI state: " + (isPhoneOpen ? "OPEN" : "CLOSED"));
         }
 
-        public void TogglePhoneVisibility()
+        public void SwitchApp(PhoneApp app)
         {
-            if (phoneUIFrame != null)
-            {
-                phoneUIFrame.SetActive(!phoneUIFrame.activeSelf);
-                Debug.Log("[WiseCity Smartphone] Phone visibility toggled: " + phoneUIFrame.activeSelf);
-            }
-        }
-
-        public void OpenApp(SmartphoneApp app)
-        {
-            currentApp = app;
-            Debug.Log("[WiseCity Smartphone] Opened App: " + currentApp.ToString());
-        }
-
-        public void PostChirperMessage(string author, string message)
-        {
-            ChirperPost post = new ChirperPost
-            {
-                authorName = author,
-                messageText = message,
-                timestampString = System.DateTime.Now.ToString("HH:mm")
-            };
-            socialFeed.Insert(0, post);
-            Debug.Log(string.Format("[WiseCity Chirper] @{0}: {1}", author, message));
-        }
-
-        public void MakePrivateCall(int targetPlayerID)
-        {
-            Debug.Log("[WiseCity Phone Call] Dialing player ID: " + targetPlayerID);
+            activeApp = app;
+            Debug.Log("[WisePro Phone] Switched to App: " + app);
         }
 
         public void SendPrivateSMS(int targetPlayerID, string smsBody)
         {
-            photonView.RPC("ReceivePrivateSMSRpc", RpcTarget.All, targetPlayerID, PhotonNetwork.LocalPlayer.NickName, smsBody);
+            ReceivePrivateSMSRpc(targetPlayerID, "المواطن", smsBody);
         }
 
-        [PunRPC]
-        void ReceivePrivateSMSRpc(int targetPlayerID, string senderName, string body)
+        public void BlockNumber(string number)
         {
-            if (PhotonNetwork.LocalPlayer != null && PhotonNetwork.LocalPlayer.ActorNumber == targetPlayerID)
+            if (!blockedNumbers.Contains(number))
             {
-                Debug.Log(string.Format("[WiseCity WisePro SMS] New message from {0}: {1}", senderName, body));
+                blockedNumbers.Add(number);
+                Debug.Log("[WisePro Phone] Blocked contact: " + number);
             }
+        }
+
+        void ReceivePrivateSMSRpc(int targetPlayerID, string senderName, string smsBody)
+        {
+            Debug.Log(string.Format("[WisePro Phone] SMS to ID {0} from {1}: {2}", targetPlayerID, senderName, smsBody));
         }
     }
 }

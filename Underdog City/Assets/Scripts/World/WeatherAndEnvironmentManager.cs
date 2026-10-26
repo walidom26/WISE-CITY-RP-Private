@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 
 namespace UnderdogCity
 {
@@ -9,26 +8,20 @@ namespace UnderdogCity
 
         public enum WeatherState
         {
-            Clear,  // صحو
-            Rain,   // أمطار
-            Fog     // ضباب
+            Clear,
+            Rainy,
+            Foggy
         }
 
-        [Header("2️⃣ الطقس والدورة الزمنية - وايز سيتي")]
+        [Header("🌦️ الطقس الديناميكي والبيئة - Wise City Weather")]
         public WeatherState currentWeather = WeatherState.Clear;
-        public Light mainDirectionalLight;
-        public ParticleSystem rainParticleSystem;
-        public ParticleSystem fogParticleSystem;
+        public float dayNightTimeHour = 12f; // 0 to 24
+        public float timeSpeed = 0.5f;
 
-        [Header("إعدادات الليل والنهار")]
-        public float dayCycleDurationSeconds = 1200f; // 20 دقيقة لدورة كاملة
-        [Range(0f, 24f)]
-        public float timeOfDayHours = 12f;
-        public Light[] cityStreetLights;
+        [Header("تأثير الطقس على الإطارات - Tire Grip Effect")]
+        public float wetGripMultiplier = 0.65f; // انزلاق واقعي أثناء المطر
 
-        [Header("تأثير الطقس على احتكاك المركبات (Tire Grip)")]
-        public float wetGripMultiplier = 0.55f; // تقليل الثبات بنسبة 45% في المطر
-        public float dryGripMultiplier = 1.0f;
+        private Light sunDirectionalLight;
 
         private void Awake()
         {
@@ -38,78 +31,37 @@ namespace UnderdogCity
 
         private void Start()
         {
-            SetWeather(currentWeather);
-            Debug.Log("[WiseCity Weather] Weather & Environment Manager started.");
+            sunDirectionalLight = Object.FindObjectOfType<Light>();
         }
 
         private void Update()
         {
-            // تحديث دورة الوقت (الليل والنهار)
-            timeOfDayHours += (Time.deltaTime / dayCycleDurationSeconds) * 24f;
-            if (timeOfDayHours >= 24f) timeOfDayHours -= 24f;
+            // Day/Night Cycle Progression
+            dayNightTimeHour += Time.deltaTime * timeSpeed;
+            if (dayNightTimeHour >= 24f) dayNightTimeHour = 0f;
 
-            UpdateLightingAndStreetLights();
+            if (sunDirectionalLight != null)
+            {
+                float rotX = (dayNightTimeHour / 24f) * 360f - 90f;
+                sunDirectionalLight.transform.rotation = Quaternion.Euler(rotX, 170f, 0f);
+            }
         }
 
         public void SetWeather(WeatherState newWeather)
         {
             currentWeather = newWeather;
+            float gripMult = (currentWeather == WeatherState.Rainy) ? wetGripMultiplier : 1.0f;
 
-            if (rainParticleSystem != null)
-            {
-                if (currentWeather == WeatherState.Rain) rainParticleSystem.Play();
-                else rainParticleSystem.Stop();
-            }
-
-            if (fogParticleSystem != null)
-            {
-                if (currentWeather == WeatherState.Fog) fogParticleSystem.Play();
-                else fogParticleSystem.Stop();
-            }
-
-            // تعديل ثبات كافّة السيارات في الخريطة بناءً على حالة الطقس
-            ApplyTireGripToAllVehicles();
-
-            Debug.Log("[WiseCity Weather] Weather changed to: " + currentWeather.ToString());
-        }
-
-        public float GetCurrentGripMultiplier()
-        {
-            return (currentWeather == WeatherState.Rain) ? wetGripMultiplier : dryGripMultiplier;
-        }
-
-        private void ApplyTireGripToAllVehicles()
-        {
-            CarPhysics[] cars = FindObjectsOfType<CarPhysics>();
-            float mult = GetCurrentGripMultiplier();
-
+            CarPhysics[] cars = Object.FindObjectsOfType<CarPhysics>();
             foreach (var car in cars)
             {
                 if (car != null)
                 {
-                    car.Grip = 5f * mult;
+                    car.Grip = 5f * gripMult;
                 }
             }
-        }
 
-        private void UpdateLightingAndStreetLights()
-        {
-            if (mainDirectionalLight != null)
-            {
-                float sunAngle = (timeOfDayHours / 24f) * 360f - 90f;
-                mainDirectionalLight.transform.rotation = Quaternion.Euler(sunAngle, 170f, 0f);
-
-                bool isNight = (timeOfDayHours < 6f || timeOfDayHours > 18f);
-                mainDirectionalLight.intensity = isNight ? 0.1f : 1.2f;
-
-                if (cityStreetLights != null)
-                {
-                    foreach (var light in cityStreetLights)
-                    {
-                        if (light != null) light.enabled = isNight;
-                    }
-                }
-            }
+            Debug.Log("[WiseCity Environment] Weather updated to: " + newWeather + " | Grip Multiplier: " + gripMult);
         }
     }
 }

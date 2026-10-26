@@ -1,44 +1,36 @@
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
-using Photon.Pun;
 
 namespace UnderdogCity
 {
-    public class ChatSystem : MonoBehaviourPunCallbacks
+    public class ChatSystem : MonoBehaviour
     {
         public static ChatSystem Instance { get; private set; }
 
         public enum ChatChannel
         {
-            Proximity, // قريب
-            Radio,     // راديو الفصائل
-            Admin,     // شات الإدارة
-            Phone      // رسائل الهاتف
+            Nearby = 0, // قريب
+            Radio = 1,  // راديو الفصيل
+            Admin = 2,  // إدارة
+            Phone = 3   // هاتف
         }
 
-        [Header("1️⃣ عناصر واجهة الشات - وايز سيتي")]
-        public InputField inputChat;
-        public Text txtChatLog;
-        public Button btnSend;
-        public Button[] channelTabs; // 0: Proximity, 1: Radio, 2: Admin, 3: Phone
-        public CanvasGroup chatCanvasGroup;
+        [Header("💬 نظام الشات وإدارة القنوات - وايز سيتي")]
+        public ChatChannel currentChannel = ChatChannel.Nearby;
+        public float nearbyChatDistance = 20f;
+        public int maxMessageHistory = 50;
 
-        [Header("إعدادات القنوات")]
-        public ChatChannel currentChannel = ChatChannel.Proximity;
-        public float proximityDistance = 25f;
-
-        private struct ChatMessage
+        [System.Serializable]
+        public struct ChatMessage
         {
             public string senderName;
             public int senderID;
-            public string text;
+            public string messageText;
             public ChatChannel channel;
             public Vector3 senderPosition;
         }
 
-        private List<ChatMessage> messageHistory = new List<ChatMessage>();
+        public List<ChatMessage> chatHistory = new List<ChatMessage>();
 
         private void Awake()
         {
@@ -46,144 +38,51 @@ namespace UnderdogCity
             else Destroy(gameObject);
         }
 
-        private void Start()
+        public void SendChatMessage(string text)
         {
-            if (btnSend != null) btnSend.onClick.AddListener(OnSendMessageClicked);
-            if (inputChat != null) inputChat.placeholder.GetComponent<Text>().text = "Tap to open chat...";
+            if (string.IsNullOrEmpty(text)) return;
 
-            for (int i = 0; i < channelTabs.Length; i++)
+            int myID = 1001;
+            string myName = "المواطن";
+
+            if (AccountManager.Instance != null && AccountManager.Instance.currentAccount != null)
             {
-                int index = i;
-                if (channelTabs[i] != null)
-                {
-                    channelTabs[i].onClick.AddListener(() => SwitchChannel((ChatChannel)index));
-                }
+                myName = AccountManager.Instance.currentAccount.username;
             }
 
-            AddLocalSystemMessage("مرحباً بك في مدينة WISE CITY RP. اكتب /help للحصول على التعليمات.");
+            Vector3 pos = Vector3.zero;
+            if (PlayerController.LocalPlayer != null) pos = PlayerController.LocalPlayer.transform.position;
+
+            BroadcastChatMessageRpc(myName, myID, text, (int)currentChannel, pos);
         }
 
-        public void SwitchChannel(ChatChannel channel)
-        {
-            currentChannel = channel;
-            RefreshChatLogUI();
-            Debug.Log("[WiseCity Chat] Switched channel to: " + currentChannel.ToString());
-        }
-
-        public void OnSendMessageClicked()
-        {
-            if (inputChat == null || string.IsNullOrEmpty(inputChat.text.Trim())) return;
-
-            string messageText = inputChat.text.Trim();
-            inputChat.text = "";
-
-            int myID = PhotonNetwork.LocalPlayer != null ? PhotonNetwork.LocalPlayer.ActorNumber : 1001;
-            string myName = PhotonNetwork.LocalPlayer != null ? PhotonNetwork.LocalPlayer.NickName : "المواطن";
-
-            if (messageText.StartsWith("/"))
-            {
-                HandleCommand(messageText);
-                return;
-            }
-
-            Vector3 myPos = transform.position;
-            photonView.RPC("BroadcastChatMessageRpc", RpcTarget.All, myName, myID, messageText, (int)currentChannel, myPos);
-        }
-
-        [PunRPC]
         void BroadcastChatMessageRpc(string senderName, int senderID, string text, int channelInt, Vector3 senderPosition)
         {
             ChatChannel channel = (ChatChannel)channelInt;
 
-            // التحقق من المسافة لقناة "قريب"
-            if (channel == ChatChannel.Proximity)
+            Vector3 myPos = Vector3.zero;
+            if (PlayerController.LocalPlayer != null) myPos = PlayerController.LocalPlayer.transform.position;
+
+            if (channel == ChatChannel.Nearby && Vector3.Distance(myPos, senderPosition) > nearbyChatDistance)
             {
-                float dist = Vector3.Distance(transform.position, senderPosition);
-                if (dist > proximityDistance) return;
+                return;
             }
 
             ChatMessage msg = new ChatMessage
             {
                 senderName = senderName,
                 senderID = senderID,
-                text = text,
+                messageText = text,
                 channel = channel,
                 senderPosition = senderPosition
             };
 
-            messageHistory.Add(msg);
-            RefreshChatLogUI();
-        }
+            chatHistory.Add(msg);
+            if (chatHistory.Count > maxMessageHistory) chatHistory.RemoveAt(0);
 
-        public void AddLocalSystemMessage(string text)
-        {
-            ChatMessage msg = new ChatMessage
+            if (HUDManager.Instance != null)
             {
-                senderName = "النظام",
-                senderID = 0,
-                text = text,
-                channel = ChatChannel.Proximity,
-                senderPosition = Vector3.zero
-            };
-
-            messageHistory.Add(msg);
-            RefreshChatLogUI();
-        }
-
-        private void RefreshChatLogUI()
-        {
-            if (txtChatLog == null) return;
-
-            txtChatLog.text = "";
-            foreach (var msg in messageHistory)
-            {
-                if (msg.channel == currentChannel || msg.senderID == 0)
-                {
-                    string colorPrefix = GetChannelColorHex(msg.channel);
-                    txtChatLog.text += string.Format("<color={0}>[{1}] [{2}#{3}]: {4}</color>\n",
-                        colorPrefix, GetChannelTag(msg.channel), msg.senderName, msg.senderID, msg.text);
-                }
-            }
-        }
-
-        private string GetChannelTag(ChatChannel channel)
-        {
-            switch (channel)
-            {
-                case ChatChannel.Proximity: return "قريب";
-                case ChatChannel.Radio: return "راديو";
-                case ChatChannel.Admin: return "إدارة";
-                case ChatChannel.Phone: return "هاتف";
-                default: return "عام";
-            }
-        }
-
-        private string GetChannelColorHex(ChatChannel channel)
-        {
-            switch (channel)
-            {
-                case ChatChannel.Proximity: return "#FFFFFF";
-                case ChatChannel.Radio: return "#00FFFF";
-                case ChatChannel.Admin: return "#FF4444";
-                case ChatChannel.Phone: return "#FFFF00";
-                default: return "#FFFFFF";
-            }
-        }
-
-        private void HandleCommand(string command)
-        {
-            if (command.Equals("/help", System.StringComparison.OrdinalIgnoreCase))
-            {
-                AddLocalSystemMessage("الأوامر المتاحة: /me [الفعل], /do [الوصف], /pay [المبلغ], /stats");
-            }
-            else if (command.StartsWith("/me ", System.StringComparison.OrdinalIgnoreCase))
-            {
-                string action = command.Substring(4);
-                photonView.RPC("BroadcastChatMessageRpc", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, PhotonNetwork.LocalPlayer.ActorNumber, "* " + action + " *", (int)currentChannel, transform.position);
-            }
-            else
-            {
-                AddLocalSystemMessage("أمر غير معروف. اكتب /help للتعليمات.");
+                HUDManager.Instance.AddChatMessage(channel.ToString(), senderName + ": " + text);
             }
         }
     }

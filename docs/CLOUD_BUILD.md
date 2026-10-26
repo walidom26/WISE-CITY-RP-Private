@@ -1,6 +1,6 @@
 # ☁️ دليل البناء السحابي المباشر وبناء نسخة الأندرويد (APK) عبر GitHub Actions
 
-يوفر هذا المشروع نظام بناء سحابي مباشر ومتحقق منه بالكامل لاستخراج ملفات التطبيق (APK) للعبة **Wise City RP** تلقائياً عبر **GameCI** و **GitHub Actions** باستخدام المصادقة الآلية عبر حساب يونيتي بريداً وكلمة مرور دون الحاجة لأي مفاتيح ترخيص أو أرقام تسلسلية (`UNITY_SERIAL`) أو ملفات تفعيل يدوية (`UNITY_LICENSE` / `.alf`).
+يوفر هذا المشروع نظام بناء سحابي مباشر ومتحقق منه بالكامل لاستخراج ملفات التطبيق (APK) للعبة **Wise City RP** تلقائياً عبر **GameCI** و **GitHub Actions** على بيئة `ubuntu-24.04` ومحرك **Unity 2022.3.62f3**.
 
 ---
 
@@ -10,12 +10,13 @@
 
 ### الأسرار المطلوبة في GitHub Repository Secrets:
 
-قم بإضافة الأسرار التالية فقط في إعدادات المستودع (`Settings -> Secrets and variables -> Actions`):
+قم بإضافة الأسرار التالية في إعدادات المستودع (`Settings -> Secrets and variables -> Actions`):
 
 * **`UNITY_EMAIL`**: البريد الإلكتروني لحساب Unity الخاص بك.
 * **`UNITY_PASSWORD`**: كلمة المرور لحساب Unity الخاص بك.
+* **`UNITY_LICENSE`**: نص ترخيص يونيتي (Personal License أو Professional ULF/XML).
 
-تقوم أداة `game-ci/unity-builder` باستخدام الأسرار الممررة عبر متغيرات البيئة (`env`) لتسجيل الدخول التلقائي قبل بناء واستخراج الـ APK.
+تقوم أداة `game-ci/unity-builder@v4` باستخدام الأسرار الممررة عبر متغيرات البيئة (`env`) لبناء واستخراج ملفات الـ APK تلقائياً.
 
 ---
 
@@ -30,7 +31,8 @@
 
 ## 3️⃣ مواصفات بيئة البناء
 
-* **نسخة المحرك (Unity Version):** `2018.3.0f2`
+* **نسخة المحرك (Unity Version):** `2022.3.62f3`
 * **مسار المشروع (Project Path):** `Underdog City`
 * **منصة الاستهداف (Target Platform):** `Android` (`androidPackage`)
-* **التوافقية البرمجية:** `net10.0` C# / Photon PUN Multiplayer Framework
+* **بيئة التشغيل (Runner):** `ubuntu-24.04`
+* **التوافقية البرمجية:** `net10.0` C# / Mirror Multiplayer Framework

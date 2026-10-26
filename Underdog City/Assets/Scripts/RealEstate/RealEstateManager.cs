@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace UnderdogCity
@@ -8,66 +7,65 @@ namespace UnderdogCity
     {
         public static RealEstateManager Instance { get; private set; }
 
-        public enum PropertyTier
+        public enum PropertyType
         {
-            EconomyApartment, // شقق اقتصادية
-            MediumHouse,      // منازل متوسطة
-            LuxuryVilla       // فلل وقصور فاخرة بمرائب خاصة
+            EconomyApartment,
+            MediumHouse,
+            LuxuryVilla
         }
 
         [System.Serializable]
-        public class Property
+        public class RealEstateProperty
         {
-            public string propertyID;
-            public string title;
-            public PropertyTier tier;
+            public int propertyID;
+            public string propertyName;
+            public PropertyType type;
             public double purchasePrice;
-            public Vector3 doorCoordinates;
-            public string ownerName;
+            public Vector3 location;
             public bool isOwned;
             public bool hasPrivateGarage;
-            public int garageCapacity;
+            public List<string> guestAccessAccountIDs = new List<string>();
         }
 
-        [Header("7️⃣ العقارات والفلل والقصور - وايز سيتي")]
-        public List<Property> propertiesCatalog = new List<Property>();
+        [Header("🏡 نظام العقارات والمرائب - Wise City Real Estate")]
+        public List<RealEstateProperty> availableProperties = new List<RealEstateProperty>();
 
         private void Awake()
         {
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
+            InitializePropertyList();
         }
 
-        private void Start()
+        void InitializePropertyList()
         {
-            InitializeDefaultProperties();
-            Debug.Log("[WiseCity Real Estate] Tiered Real Estate Manager initialized.");
+            availableProperties.Add(new RealEstateProperty { propertyID = 1, propertyName = "شقة الاقتصاد الشاطئية", type = PropertyType.EconomyApartment, purchasePrice = 150000.0, location = new Vector3(100, 5, 200), isOwned = false, hasPrivateGarage = false });
+            availableProperties.Add(new RealEstateProperty { propertyID = 2, propertyName = "منزل وسط المدينة", type = PropertyType.MediumHouse, purchasePrice = 500000.0, location = new Vector3(-150, 5, 300), isOwned = false, hasPrivateGarage = true });
+            availableProperties.Add(new RealEstateProperty { propertyID = 3, propertyName = "فيلا الأكابر الفاخرة", type = PropertyType.LuxuryVilla, purchasePrice = 2500000.0, location = new Vector3(500, 10, 500), isOwned = false, hasPrivateGarage = true });
         }
 
-        private void InitializeDefaultProperties()
+        public void PurchaseProperty(int propertyID)
         {
-            propertiesCatalog.Add(new Property { propertyID = "PROP-101", title = "شقة وسط المدينة الاقتصادية", tier = PropertyTier.EconomyApartment, purchasePrice = 45000, doorCoordinates = new Vector3(120, 0, -80), ownerName = "", isOwned = false, hasPrivateGarage = false, garageCapacity = 0 });
-            propertiesCatalog.Add(new Property { propertyID = "PROP-202", title = "منزل حي الياسمين المتوسط", tier = PropertyTier.MediumHouse, purchasePrice = 180000, doorCoordinates = new Vector3(-250, 0, 310), ownerName = "", isOwned = false, hasPrivateGarage = true, garageCapacity = 2 });
-            propertiesCatalog.Add(new Property { propertyID = "PROP-303", title = "قصر التلة الملكي والفيلا الفاخرة", tier = PropertyTier.LuxuryVilla, purchasePrice = 1200000, doorCoordinates = new Vector3(400, 0, 500), ownerName = "", isOwned = false, hasPrivateGarage = true, garageCapacity = 6 });
-        }
+            RealEstateProperty prop = availableProperties.Find(p => p.propertyID == propertyID);
+            if (prop == null || prop.isOwned || HUDController.Instance == null) return;
 
-        public bool BuyProperty(string propertyID, string buyerName)
-        {
-            Property prop = propertiesCatalog.Find(p => p.propertyID == propertyID && !p.isOwned);
-            if (prop != null)
+            if (HUDController.Instance.bank >= prop.purchasePrice)
             {
-                if (HUDController.Instance != null && HUDController.Instance.bank >= prop.purchasePrice)
-                {
-                    HUDController.Instance.bank -= prop.purchasePrice;
-                    HUDController.Instance.UpdatePlayerInfoUI();
-
-                    prop.isOwned = true;
-                    prop.ownerName = buyerName;
-                    Debug.Log(string.Format("[WiseCity Real Estate] Purchased {0} for ${1:N0} by {2}", prop.title, prop.purchasePrice, buyerName));
-                    return true;
-                }
+                HUDController.Instance.bank -= prop.purchasePrice;
+                prop.isOwned = true;
+                HUDController.Instance.UpdatePlayerInfoUI();
+                Debug.Log("[WiseCity RealEstate] Purchased " + prop.propertyName + " for $" + prop.purchasePrice);
             }
-            return false;
+        }
+
+        public void GrantGuestKey(int propertyID, string guestAccountID)
+        {
+            RealEstateProperty prop = availableProperties.Find(p => p.propertyID == propertyID);
+            if (prop != null && prop.isOwned && !prop.guestAccessAccountIDs.Contains(guestAccountID))
+            {
+                prop.guestAccessAccountIDs.Add(guestAccountID);
+                Debug.Log(string.Format("[WiseCity RealEstate] Granted guest key for property {0} to {1}", propertyID, guestAccountID));
+            }
         }
     }
 }
