@@ -1,9 +1,8 @@
-using UnityEngine;
 using System.Collections.Generic;
 
 namespace UnderdogCity
 {
-    public class JudiciaryManager : MonoBehaviour
+    public class JudiciaryManager : UnityEngine.MonoBehaviour
     {
         public static JudiciaryManager Instance { get; private set; }
 
@@ -21,20 +20,20 @@ namespace UnderdogCity
             public string verdict;
         }
 
-        [Header("⚖️ المحاكم والقضاء - Wise Judiciary & Legal System")]
+        [UnityEngine.Header("⚖️ المحاكم والقضاء - Wise Judiciary & Legal System")]
         public List<CourtCase> pendingCases = new List<CourtCase>();
 
         private void Awake()
         {
             if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            else UnityEngine.Object.Destroy(gameObject);
         }
 
         public void FileCourtCase(string defendantName, string charge, double bail)
         {
             CourtCase c = new CourtCase
             {
-                caseID = Random.Range(1000, 9999),
+                caseID = UnityEngine.Random.Range(1000, 9999),
                 defendantName = defendantName,
                 charge = charge,
                 assignedLawyerName = "محامي الدولة",
@@ -46,7 +45,7 @@ namespace UnderdogCity
             };
 
             pendingCases.Add(c);
-            Debug.Log(string.Format("[JUDICIARY] Filed Case #{0} against {1} for {2} | Bail: ${3}", c.caseID, defendantName, charge, bail));
+            UnityEngine.Debug.Log(string.Format("[JUDICIARY] Filed Case #{0} against {1} for {2} | Bail: ${3}", c.caseID, defendantName, charge, bail));
         }
 
         public void IssueVerdict(int caseID, string verdict, int sentenceJailMinutes)
@@ -57,7 +56,7 @@ namespace UnderdogCity
                 c.verdict = verdict;
                 c.sentenceJailMinutes = sentenceJailMinutes;
                 c.isResolved = true;
-                Debug.Log(string.Format("[JUDICIARY] Case #{0} Verdict: {1} | Jail Sentence: {2} mins", caseID, verdict, sentenceJailMinutes));
+                UnityEngine.Debug.Log(string.Format("[JUDICIARY] Case #{0} Verdict: {1} | Jail Sentence: {2} mins", caseID, verdict, sentenceJailMinutes));
             }
         }
     }

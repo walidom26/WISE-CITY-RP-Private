@@ -1,9 +1,8 @@
-using UnityEngine;
 using System.Collections.Generic;
 
 namespace UnderdogCity
 {
-    public class BusinessManager : MonoBehaviour
+    public class BusinessManager : UnityEngine.MonoBehaviour
     {
         public static BusinessManager Instance { get; private set; }
 
@@ -18,13 +17,13 @@ namespace UnderdogCity
             public List<string> employeesList = new List<string>();
         }
 
-        [Header("🏪 الشركات والمتاجر الخاصة - Wise Commercial Businesses")]
+        [UnityEngine.Header("🏪 الشركات والمتاجر الخاصة - Wise Commercial Businesses")]
         public List<CommercialShop> registeredShops = new List<CommercialShop>();
 
         private void Awake()
         {
             if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            else UnityEngine.Object.Destroy(gameObject);
             InitializeShops();
         }
 
@@ -38,7 +37,7 @@ namespace UnderdogCity
         {
             CommercialShop shop = new CommercialShop
             {
-                shopID = Random.Range(10, 99),
+                shopID = UnityEngine.Random.Range(10, 99),
                 shopName = name,
                 ownerAccountID = ownerID,
                 companyBankBalance = initialCapital,
@@ -46,7 +45,7 @@ namespace UnderdogCity
             };
 
             registeredShops.Add(shop);
-            Debug.Log(string.Format("[BUSINESS] Registered New Company '{0}' for Owner {1} with ${2} capital", name, ownerID, initialCapital));
+            UnityEngine.Debug.Log(string.Format("[BUSINESS] Registered New Company '{0}' for Owner {1} with ${2} capital", name, ownerID, initialCapital));
         }
 
         public void ProcessSale(int shopID, double saleAmount)
@@ -56,7 +55,7 @@ namespace UnderdogCity
             {
                 shop.companyBankBalance += saleAmount;
                 shop.dailyRevenue += saleAmount;
-                Debug.Log(string.Format("[BUSINESS] Shop '{0}' processed sale: +${1}", shop.shopName, saleAmount));
+                UnityEngine.Debug.Log(string.Format("[BUSINESS] Shop '{0}' processed sale: +${1}", shop.shopName, saleAmount));
             }
         }
     }

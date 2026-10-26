@@ -26,12 +26,12 @@ namespace UnderdogCity
         private void Awake()
         {
             if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            else UnityEngine.Object.Destroy(gameObject);
         }
 
         private void Start()
         {
-            sunDirectionalLight = Object.FindObjectOfType<Light>();
+            sunDirectionalLight = UnityEngine.Object.FindObjectOfType<Light>();
         }
 
         private void Update()
@@ -52,7 +52,7 @@ namespace UnderdogCity
             currentWeather = newWeather;
             float gripMult = (currentWeather == WeatherState.Rainy) ? wetGripMultiplier : 1.0f;
 
-            CarPhysics[] cars = Object.FindObjectsOfType<CarPhysics>();
+            CarPhysics[] cars = UnityEngine.Object.FindObjectsOfType<CarPhysics>();
             foreach (var car in cars)
             {
                 if (car != null)

@@ -59,7 +59,7 @@ namespace UnderdogCity
 
             GameObject tempPrimitive = GameObject.CreatePrimitive(type);
             Mesh primitiveMesh = tempPrimitive.GetComponent<MeshFilter>().sharedMesh;
-            Object.Destroy(tempPrimitive);
+            UnityEngine.Object.Destroy(tempPrimitive);
 
             meshCache[key] = primitiveMesh;
             return primitiveMesh;

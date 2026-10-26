@@ -26,7 +26,7 @@ namespace UnderdogCity
         private void Awake()
         {
             if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            else UnityEngine.Object.Destroy(gameObject);
         }
 
         public void SetOffDutyStatus(bool offDuty)
@@ -51,7 +51,7 @@ namespace UnderdogCity
         public void SendToJail(int targetPlayerID, int durationMinutes, bool isSovereignJail)
         {
             if (currentFaction != FactionType.Police && currentFaction != FactionType.RepublicanGuard) return;
-            int clampedMinutes = isSovereignJail ? Mathf.Clamp(durationMinutes, 20, 30) : Mathf.Clamp(durationMinutes, 3, 15);
+            int clampedMinutes = (int)Mathf.Clamp((float)durationMinutes, isSovereignJail ? 20f : 3f, isSovereignJail ? 30f : 15f);
             PoliceJailRpc(targetPlayerID, clampedMinutes, isSovereignJail);
         }
 

@@ -1,4 +1,5 @@
 name: Build Unity Android APK
+
 on:
   workflow_dispatch:
   push:
@@ -10,16 +11,22 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           lfs: true
-      - uses: actions/cache@v4
+
+      - name: Cache Unity Library directory
+        uses: actions/cache@v4
         with:
           path: Underdog City/Library
           key: Library-UnderdogCity-Android-${{ hashFiles('Underdog City/Assets/**', 'Underdog City/Packages/**') }}
           restore-keys: |
             Library-UnderdogCity-Android-
-      - uses: game-ci/unity-builder@v4
+            Library-UnderdogCity-
+
+      - name: Build Android APK
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -29,7 +36,9 @@ jobs:
           unityVersion: 2022.3.62f3
           targetPlatform: Android
           androidExportType: androidPackage
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload Android APK Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: WiseCityRP-Android-APK
           path: build/Android
