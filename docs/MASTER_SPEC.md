@@ -41,3 +41,4 @@ O) Performance on mid-range Android: LOD, culling, region streaming, quality pre
 
 ORDER: Step 0 fix → A, B, D, E → C → F, G, H, M → I → J, K, L → N, O. Open one PR per group.
 At the very end, update docs/REQUIREMENTS_CHECKLIST.md and write docs/REPORT_<n>.md honestly.
+ADDITIONAL MANDATORY ITEMS (do not skip): character customization (face, hair, beard, eyes) saved per account; clothing stores (clothes are changed ONLY inside clothing stores, with preview/buy/owned wardrobe), salons/clinics for hair and looks, rank-bound faction uniforms; a real Inventory system (items, weights/slots, storage, trading through the secure trade system); account recovery done securely; Google sign-in only if it can be integrated securely, otherwise list it under "needs my action"; friend groups, emotes and social animations; seasonal and time-based activities; everything in docs/MASTER_SPEC.md that is not repeated here.
