@@ -1,9 +1,8 @@
 using UnityEngine;
-using Photon.Pun;
 
 namespace UnderdogCity
 {
-    public class VehicleController : MonoBehaviourPun
+    public class VehicleController : MonoBehaviour
     {
         public enum VehicleClass
         {
@@ -32,7 +31,6 @@ namespace UnderdogCity
 
         [Header("الصحة والضرر")]
         public float vehicleHealth = 100f;
-        public ParticleSystem smokeParticles;
 
         public PlayerController currentDriver = null;
 
@@ -45,7 +43,6 @@ namespace UnderdogCity
             if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
             rb.mass = 1500f;
 
-            // Generate wheel colliders if absent
             wheels = GetComponentsInChildren<WheelCollider>();
             if (wheels.Length == 0)
             {
@@ -61,10 +58,10 @@ namespace UnderdogCity
 
             Vector3[] wheelPositions = new Vector3[]
             {
-                new Vector3(-0.9f, 0f, 1.4f),  // Front Left
-                new Vector3(0.9f, 0f, 1.4f),   // Front Right
-                new Vector3(-0.9f, 0f, -1.4f), // Rear Left
-                new Vector3(0.9f, 0f, -1.4f)   // Rear Right
+                new Vector3(-0.9f, 0f, 1.4f),
+                new Vector3(0.9f, 0f, 1.4f),
+                new Vector3(-0.9f, 0f, -1.4f),
+                new Vector3(0.9f, 0f, -1.4f)
             };
 
             wheels = new WheelCollider[4];
@@ -79,7 +76,7 @@ namespace UnderdogCity
 
         private void Update()
         {
-            if (currentDriver != null && (photonView.IsMine || !PhotonNetwork.IsConnected))
+            if (currentDriver != null)
             {
                 HandleDrivingControls();
             }
@@ -96,7 +93,6 @@ namespace UnderdogCity
                 currentFuel -= fuelConsumptionRate * Time.deltaTime;
             }
 
-            // Apply to wheels
             if (wheels != null && wheels.Length >= 4)
             {
                 wheels[0].steerAngle = steer;

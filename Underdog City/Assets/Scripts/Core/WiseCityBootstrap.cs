@@ -41,6 +41,7 @@ namespace UnderdogCity
             EnsureManager<ProceduralWorldGenerator>("WorldGenerator");
             EnsureManager<AccountManager>("AccountManager");
             EnsureManager<HUDManager>("HUDManager");
+            EnsureManager<HUDController>("HUDController");
             EnsureManager<PlayerController>("PlayerController");
             EnsureManager<VehicleController>("VehicleController");
             EnsureManager<AdminAndAntiCheatManager>("AdminAndAntiCheatManager");

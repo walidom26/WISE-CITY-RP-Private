@@ -1,10 +1,9 @@
 using UnityEngine;
-using Photon.Pun;
 
 namespace UnderdogCity
 {
     [RequireComponent(typeof(CharacterController))]
-    public class PlayerController : MonoBehaviourPun
+    public class PlayerController : MonoBehaviour
     {
         public static PlayerController LocalPlayer { get; private set; }
 
@@ -29,10 +28,7 @@ namespace UnderdogCity
         private void Awake()
         {
             characterController = GetComponent<CharacterController>();
-            if (photonView.IsMine || !PhotonNetwork.IsConnected)
-            {
-                LocalPlayer = this;
-            }
+            LocalPlayer = this;
         }
 
         private void Start()
@@ -45,15 +41,12 @@ namespace UnderdogCity
 
         private void Update()
         {
-            if (photonView.IsMine || !PhotonNetwork.IsConnected)
+            if (!isDriving)
             {
-                if (!isDriving)
-                {
-                    HandlePlayerMovement();
-                }
-
-                HandleVehicleInteractionCheck();
+                HandlePlayerMovement();
             }
+
+            HandleVehicleInteractionCheck();
         }
 
         private void HandlePlayerMovement()
@@ -74,7 +67,6 @@ namespace UnderdogCity
                 characterController.Move(moveDir.normalized * speed * Time.deltaTime);
             }
 
-            // Gravity & Jump
             if (characterController.isGrounded)
             {
                 if (velocity.y < 0) velocity.y = -2f;
@@ -88,7 +80,6 @@ namespace UnderdogCity
             velocity.y += gravity * Time.deltaTime;
             characterController.Move(velocity * Time.deltaTime);
 
-            // Camera follow
             if (cameraTransform != null)
             {
                 Vector3 targetCamPos = transform.position + new Vector3(0, 3f, -5f);
@@ -103,12 +94,10 @@ namespace UnderdogCity
             {
                 if (isDriving && currentVehicle != null)
                 {
-                    // Exit Vehicle
                     currentVehicle.ExitVehicle(this);
                 }
                 else
                 {
-                    // Search for nearest vehicle
                     Collider[] colliders = Physics.OverlapSphere(transform.position, 4f);
                     foreach (var col in colliders)
                     {

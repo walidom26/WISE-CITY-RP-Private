@@ -10,26 +10,15 @@ namespace UnderdogCity
 
         public enum JobType
         {
-            Unemployed,             // عاطل / حر
-            BusDriver,              // سائق الحافلات
-            HeavyTruckDriver,       // سائق الشاحنات الثقيلة
-            MaintenanceAndConstruction // عمال الصيانة والبناء
+            Unemployed = 0,
+            BusDriver = 1,
+            HeavyTrucker = 2,
+            MaintenanceWorker = 3
         }
 
-        [System.Serializable]
-        public class JobRoute
-        {
-            public string routeName;
-            public Vector3[] waypoints;
-            public double baseReward;
-            public int requiredJobXP;
-        }
-
-        [Header("6️⃣ المهن الحرة ونظام المستويات - وايز سيتي")]
+        [Header("👷 المهن والوظائف الحرة - Wise City Jobs")]
         public JobType currentJob = JobType.Unemployed;
-        public int jobXP = 0;
-        public int jobLevel = 1;
-        public List<JobRoute> activeRoutes = new List<JobRoute>();
+        public int jobXPLevel = 1;
 
         private void Awake()
         {
@@ -37,40 +26,19 @@ namespace UnderdogCity
             else Destroy(gameObject);
         }
 
-        private void Start()
+        public void CompleteJobTask(double payout)
         {
-            Debug.Log("[WiseCity Jobs] Free Jobs & Cargo Transportation System initialized.");
-        }
+            if (currentJob == JobType.Unemployed) return;
 
-        public void StartJob(JobType newJob)
-        {
-            currentJob = newJob;
-            Debug.Log("[WiseCity Jobs] Started job: " + currentJob.ToString());
-        }
-
-        public void CompleteJobWaypoint(double payout, int xpEarned)
-        {
-            jobXP += xpEarned;
-            if (jobXP >= jobLevel * 500)
-            {
-                jobLevel++;
-                Debug.Log("[WiseCity Jobs] Job Level Up! New Level: " + jobLevel);
-            }
-
+            jobXPLevel += 10;
             if (HUDController.Instance != null)
             {
                 HUDController.Instance.cash += payout;
-                HUDController.Instance.currentXP += xpEarned;
+                HUDController.Instance.playerXP += 5;
                 HUDController.Instance.UpdatePlayerInfoUI();
             }
 
-            Debug.Log(string.Format("[WiseCity Jobs] Route Waypoint Completed! Earned: ${0:N0} and {1} XP", payout, xpEarned));
-        }
-
-        public void QuitJob()
-        {
-            currentJob = JobType.Unemployed;
-            Debug.Log("[WiseCity Jobs] Quit current job.");
+            Debug.Log(string.Format("[WiseCity Jobs] Task Complete! Earned ${0} cash | Job XP: {1}", payout, jobXPLevel));
         }
     }
 }

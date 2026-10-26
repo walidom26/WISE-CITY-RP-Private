@@ -8,22 +8,10 @@ namespace UnderdogCity
     {
         public static FinancialManager Instance { get; private set; }
 
-        [System.Serializable]
-        public class P2PListing
-        {
-            public string listingID;
-            public string sellerName;
-            public string itemType; // Vehicle or Property
-            public string itemName;
-            public double askingPrice;
-            public bool isSold;
-        }
-
-        [Header("7️⃣ & 8️⃣ النظام المالي المتقدم والـ P2P Market - وايز سيتي")]
-        public double dailyTaxAmount = 250;
-        public double currentLoanBalance = 0;
-        public float loanInterestRatePercent = 5.0f;
-        public List<P2PListing> p2pMarketplace = new List<P2PListing>();
+        [Header("💳 النظام المالي المتقدم - Wise City Economy")]
+        public double dailyTaxAmount = 50.0;
+        public double currentLoanBalance = 0.0;
+        public double interestRate = 0.05; // 5% فائدة يومية
 
         private void Awake()
         {
@@ -33,72 +21,72 @@ namespace UnderdogCity
 
         private void Start()
         {
-            Debug.Log("[WiseCity Finance] Advanced Financial & ATM System initialized.");
-            InvokeRepeating("DeductDailyTaxes", 1200f, 1200f); // خصم الضرائب كل 20 دقيقة
+            InvokeRepeating("DeductDailyTaxes", 60f, 300f);
         }
 
-        public void DepositToATM(double amount)
+        public void DepositToBank(double amount)
         {
-            if (HUDController.Instance != null && HUDController.Instance.cash >= amount)
+            if (amount <= 0 || HUDController.Instance == null) return;
+
+            if (HUDController.Instance.cash >= amount)
             {
                 HUDController.Instance.cash -= amount;
                 HUDController.Instance.bank += amount;
                 HUDController.Instance.UpdatePlayerInfoUI();
-                Debug.Log(string.Format("[WiseCity ATM] Deposited ${0:N0} to bank account.", amount));
+                Debug.Log("[WiseCity Bank] Deposited $" + amount + " to bank account.");
             }
         }
 
-        public void WithdrawFromATM(double amount)
+        public void WithdrawFromBank(double amount)
         {
-            if (HUDController.Instance != null && HUDController.Instance.bank >= amount)
+            if (amount <= 0 || HUDController.Instance == null) return;
+
+            if (HUDController.Instance.bank >= amount)
             {
                 HUDController.Instance.bank -= amount;
                 HUDController.Instance.cash += amount;
                 HUDController.Instance.UpdatePlayerInfoUI();
-                Debug.Log(string.Format("[WiseCity ATM] Withdrew ${0:N0} from bank account.", amount));
+                Debug.Log("[WiseCity Bank] Withdrew $" + amount + " from bank account.");
             }
         }
 
-        public void ApplyBankLoan(double amount)
+        public void ApplyForLoan(double loanAmount)
         {
-            currentLoanBalance += amount * (1f + (loanInterestRatePercent / 100f));
+            if (currentLoanBalance > 0 || loanAmount <= 0) return;
+
+            currentLoanBalance = loanAmount * (1.0 + interestRate);
             if (HUDController.Instance != null)
             {
-                HUDController.Instance.bank += amount;
+                HUDController.Instance.bank += loanAmount;
                 HUDController.Instance.UpdatePlayerInfoUI();
             }
-            Debug.Log(string.Format("[WiseCity Bank Loan] Approved loan of ${0:N0}. Total repayment owed: ${1:N0}", amount, currentLoanBalance));
+            Debug.Log("[WiseCity Bank] Loan Approved: $" + loanAmount + " | Total Repayable: $" + currentLoanBalance);
         }
 
-        public void CreateP2PListing(string seller, string type, string name, double price)
+        public void RepayLoan(double amount)
         {
-            string id = "P2P-" + UnityEngine.Random.Range(1000, 9999);
-            p2pMarketplace.Add(new P2PListing
+            if (currentLoanBalance <= 0 || amount <= 0 || HUDController.Instance == null) return;
+
+            if (HUDController.Instance.bank >= amount)
             {
-                listingID = id,
-                sellerName = seller,
-                itemType = type,
-                itemName = name,
-                askingPrice = price,
-                isSold = false
-            });
-            Debug.Log(string.Format("[WiseCity P2P Market] Item listed: {0} ({1}) for ${2:N0}", name, type, price));
+                HUDController.Instance.bank -= amount;
+                currentLoanBalance -= amount;
+                if (currentLoanBalance < 0) currentLoanBalance = 0;
+                HUDController.Instance.UpdatePlayerInfoUI();
+                Debug.Log("[WiseCity Bank] Repaid $" + amount + " towards loan. Remaining: $" + currentLoanBalance);
+            }
         }
 
-        private void DeductDailyTaxes()
+        void DeductDailyTaxes()
         {
             if (HUDController.Instance != null)
             {
                 if (HUDController.Instance.bank >= dailyTaxAmount)
                 {
                     HUDController.Instance.bank -= dailyTaxAmount;
+                    HUDController.Instance.UpdatePlayerInfoUI();
+                    Debug.Log("[WiseCity Taxes] Deducted daily taxes: $" + dailyTaxAmount);
                 }
-                else if (HUDController.Instance.cash >= dailyTaxAmount)
-                {
-                    HUDController.Instance.cash -= dailyTaxAmount;
-                }
-                HUDController.Instance.UpdatePlayerInfoUI();
-                Debug.Log(string.Format("[WiseCity Taxes] Daily tax of ${0:N0} deducted.", dailyTaxAmount));
             }
         }
     }

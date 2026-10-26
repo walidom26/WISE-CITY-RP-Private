@@ -1,11 +1,10 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using Photon.Pun;
 
 namespace UnderdogCity
 {
-    public class AdminAndAntiCheatManager : MonoBehaviourPunCallbacks
+    public class AdminAndAntiCheatManager : MonoBehaviour
     {
         public static AdminAndAntiCheatManager Instance { get; private set; }
 
@@ -38,7 +37,6 @@ namespace UnderdogCity
             Debug.Log("[WiseCity Admin & AntiCheat] Admin Panel and HWID/IP Anti-Cheat initialized.");
         }
 
-        // 1. وضع الاختفاء (Vanish Mode)
         public void ToggleVanishMode()
         {
             if (localAdminRank < AdminRank.Moderator) return;
@@ -53,7 +51,6 @@ namespace UnderdogCity
             Debug.Log("[WiseCity Admin] Vanish mode: " + (isVanishActive ? "ENABLED" : "DISABLED"));
         }
 
-        // 2. المراقبة الحية (Live Spectate)
         public void SpectatePlayer(int targetPlayerID)
         {
             if (localAdminRank < AdminRank.Moderator) return;
@@ -62,22 +59,19 @@ namespace UnderdogCity
             Debug.Log("[WiseCity Admin] Spectating player ID: " + targetPlayerID);
         }
 
-        // 3. تجميد اللاعب (Freeze Player)
         public void FreezePlayer(int targetPlayerID, bool freeze)
         {
             if (localAdminRank < AdminRank.Moderator) return;
-            photonView.RPC("AdminFreezeRpc", RpcTarget.All, targetPlayerID, freeze);
+            AdminFreezeRpc(targetPlayerID, freeze);
         }
 
-        // 4. استدعاء اللاعب للتحقيق (Summon Player)
         public void SummonPlayerToAdmin(int targetPlayerID)
         {
             if (localAdminRank < AdminRank.Moderator) return;
             Vector3 adminPos = transform.position + transform.forward * 2f;
-            photonView.RPC("AdminSummonRpc", RpcTarget.All, targetPlayerID, adminPos);
+            AdminSummonRpc(targetPlayerID, adminPos);
         }
 
-        // 5. حظر الأجهزة والآي بي التلقائي (HWID / IP Ban)
         public void BanHardwareAndIP(int targetPlayerID, string hwid, string ip, string banReason)
         {
             if (localAdminRank < AdminRank.GameAdmin) return;
@@ -85,40 +79,27 @@ namespace UnderdogCity
             bannedHWIDs.Add(hwid);
             bannedIPs.Add(ip);
 
-            photonView.RPC("AdminBanRpc", RpcTarget.All, targetPlayerID, banReason);
+            AdminBanRpc(targetPlayerID, banReason);
             Debug.Log(string.Format("[WiseCity AntiCheat] Banned Player ID: {0} | HWID: {1} | IP: {2} | Reason: {3}", targetPlayerID, hwid, ip, banReason));
         }
 
-        [PunRPC]
         void AdminFreezeRpc(int targetPlayerID, bool freeze)
         {
-            if (PhotonNetwork.LocalPlayer != null && PhotonNetwork.LocalPlayer.ActorNumber == targetPlayerID)
-            {
-                PlayerMechanics mechanics = FindObjectOfType<PlayerMechanics>();
-                if (mechanics != null) mechanics.enabled = !freeze;
-                Debug.Log("[WiseCity Admin] You have been " + (freeze ? "FROZEN" : "UNFROZEN") + " by an admin.");
-            }
+            PlayerMechanics mechanics = Object.FindObjectOfType<PlayerMechanics>();
+            if (mechanics != null) mechanics.enabled = !freeze;
+            Debug.Log("[WiseCity Admin] Player ID " + targetPlayerID + (freeze ? " FROZEN" : " UNFROZEN"));
         }
 
-        [PunRPC]
         void AdminSummonRpc(int targetPlayerID, Vector3 destination)
         {
-            if (PhotonNetwork.LocalPlayer != null && PhotonNetwork.LocalPlayer.ActorNumber == targetPlayerID)
-            {
-                PlayerMechanics mechanics = FindObjectOfType<PlayerMechanics>();
-                if (mechanics != null) mechanics.transform.position = destination;
-                Debug.Log("[WiseCity Admin] You have been summoned by an admin for investigation.");
-            }
+            PlayerMechanics mechanics = Object.FindObjectOfType<PlayerMechanics>();
+            if (mechanics != null) mechanics.transform.position = destination;
+            Debug.Log("[WiseCity Admin] Player ID " + targetPlayerID + " summoned to investigation point.");
         }
 
-        [PunRPC]
         void AdminBanRpc(int targetPlayerID, string reason)
         {
-            if (PhotonNetwork.LocalPlayer != null && PhotonNetwork.LocalPlayer.ActorNumber == targetPlayerID)
-            {
-                Debug.LogError("[WiseCity AntiCheat] BANNED FROM SERVER. Reason: " + reason);
-                PhotonNetwork.Disconnect();
-            }
+            Debug.LogError("[WiseCity AntiCheat] Player ID " + targetPlayerID + " BANNED FROM SERVER. Reason: " + reason);
         }
     }
 }

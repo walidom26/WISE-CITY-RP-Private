@@ -1,6 +1,4 @@
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace UnderdogCity
 {
@@ -8,15 +6,10 @@ namespace UnderdogCity
     {
         public static ProximityVoiceSystem Instance { get; private set; }
 
-        [Header("8️⃣ الصوتيات ثلاثية الأبعاد والراديو - وايز سيتي")]
-        public float voiceMaxDistance = 20f;
-        public float whisperDistance = 5f;
-        public float shoutDistance = 40f;
-
-        public bool isTransmittingVoice = false;
-        public int currentEncryptedRadioFrequency = 100; // ترددات الفصائل
-
-        public GameObject hudSpeakingIndicator;
+        [Header("🎙️ الصوت ثلاثي الأبعاد - 3D Proximity Voice")]
+        public bool isMicrophoneActive = false;
+        public float voiceMaxDistance = 25f;
+        public int currentRadioFrequency = 1015; // 101.5 MHz encrypted radio
 
         private void Awake()
         {
@@ -24,32 +17,16 @@ namespace UnderdogCity
             else Destroy(gameObject);
         }
 
-        private void Start()
+        public void ToggleMicrophone()
         {
-            Debug.Log("[WiseCity 3D Voice] Proximity Voice & Encrypted Radio System initialized.");
+            isMicrophoneActive = !isMicrophoneActive;
+            Debug.Log("[WiseVoice] Microphone: " + (isMicrophoneActive ? "ON" : "OFF"));
         }
 
-        public void SetVoiceTransmission(bool active)
+        public void SetRadioFrequency(int freq)
         {
-            isTransmittingVoice = active;
-            if (hudSpeakingIndicator != null)
-            {
-                hudSpeakingIndicator.SetActive(isTransmittingVoice);
-            }
-            Debug.Log("[WiseCity 3D Voice] Transmission status: " + (active ? "TALKING" : "SILENT"));
-        }
-
-        public float CalculateSpatialVolume(Vector3 listenerPosition, Vector3 speakerPosition, float maxDist)
-        {
-            float distance = Vector3.Distance(listenerPosition, speakerPosition);
-            if (distance > maxDist) return 0f;
-            return Mathf.Clamp01(1f - (distance / maxDist));
-        }
-
-        public void TuneRadioFrequency(int frequency)
-        {
-            currentEncryptedRadioFrequency = frequency;
-            Debug.Log("[WiseCity Encrypted Radio] Radio tuned to encrypted channel: " + frequency + " MHz");
+            currentRadioFrequency = freq;
+            Debug.Log("[WiseVoice] Radio frequency tuned to: " + freq);
         }
     }
 }
