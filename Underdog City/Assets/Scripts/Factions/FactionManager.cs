@@ -21,6 +21,7 @@ namespace UnderdogCity
         public FactionType currentFaction = FactionType.Civilian;
         public int factionRank = 1;
         public bool isOffDuty = true;
+        public bool isSwatCertified = false; // SWAT sub-team INSIDE police
 
         private void Awake()
         {
@@ -34,7 +35,14 @@ namespace UnderdogCity
             Debug.Log("[WiseCity Faction] Off-Duty Status: " + (offDuty ? "ON (Civilian)" : "OFF (Active Duty)"));
         }
 
-        public void IssueCitation(int targetPlayerID, decimal fineAmount, string reason)
+        public void CertifySwat(bool certified)
+        {
+            if (currentFaction != FactionType.Police) return;
+            isSwatCertified = certified;
+            Debug.Log("[WiseCity Police] SWAT Certification updated: " + certified);
+        }
+
+        public void IssueCitation(int targetPlayerID, double fineAmount, string reason)
         {
             if (currentFaction != FactionType.Police && currentFaction != FactionType.RepublicanGuard) return;
             PoliceCitationRpc(targetPlayerID, fineAmount, reason);
@@ -53,7 +61,7 @@ namespace UnderdogCity
             EMSReviveRpc(targetPlayerID);
         }
 
-        void PoliceCitationRpc(int targetPlayerID, decimal fineAmount, string reason)
+        void PoliceCitationRpc(int targetPlayerID, double fineAmount, string reason)
         {
             Debug.Log(string.Format("[WiseCity Police] Issued Citation to Player ID {0} for ${1} | Reason: {2}", targetPlayerID, fineAmount, reason));
         }

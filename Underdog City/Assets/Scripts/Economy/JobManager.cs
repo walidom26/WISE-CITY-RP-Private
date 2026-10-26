@@ -11,9 +11,15 @@ namespace UnderdogCity
         public enum JobType
         {
             Unemployed = 0,
-            BusDriver = 1,
-            HeavyTrucker = 2,
-            MaintenanceWorker = 3
+            TaxiDriver = 1,
+            BusDriver = 2,
+            HeavyTrucker = 3,
+            DeliveryDriver = 4,
+            Mechanic = 5,
+            Cleaner = 6,
+            ConstructionWorker = 7,
+            ShopClerk = 8,
+            MaintenanceWorker = 9
         }
 
         [Header("👷 المهن والوظائف الحرة - Wise City Jobs")]
@@ -24,6 +30,12 @@ namespace UnderdogCity
         {
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
+        }
+
+        public void SelectJob(JobType newJob)
+        {
+            currentJob = newJob;
+            Debug.Log("[WiseCity Jobs] Selected Job: " + newJob);
         }
 
         public void CompleteJobTask(double payout)

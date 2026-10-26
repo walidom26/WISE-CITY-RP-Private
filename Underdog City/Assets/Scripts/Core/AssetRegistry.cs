@@ -10,12 +10,20 @@ namespace UnderdogCity
 
         public static void Initialize()
         {
-            Debug.Log("[AssetRegistry] Initializing procedural asset materials & meshes...");
-            GetMaterial("AsphaltRoad", new Color(0.15f, 0.15f, 0.16f), 0.1f, 0.8f);
-            GetMaterial("SidewalkConcrete", new Color(0.55f, 0.55f, 0.56f), 0.0f, 0.9f);
-            GetMaterial("BuildingGlass", new Color(0.1f, 0.2f, 0.3f, 0.6f), 0.9f, 0.1f);
-            GetMaterial("GoldLuxury", new Color(0.85f, 0.65f, 0.12f), 0.8f, 0.2f);
-            GetMaterial("DarkMetal", new Color(0.2f, 0.2f, 0.22f), 0.5f, 0.4f);
+            Debug.Log("[AssetRegistry] Initializing AAA PBR materials and procedural geometry registry...");
+
+            // Standard PBR Surface Materials
+            GetMaterial("AsphaltRoad", new Color(0.12f, 0.12f, 0.14f), 0.1f, 0.8f);
+            GetMaterial("SidewalkConcrete", new Color(0.58f, 0.58f, 0.60f), 0.05f, 0.85f);
+            GetMaterial("BuildingGlass", new Color(0.1f, 0.25f, 0.4f, 0.65f), 0.95f, 0.1f);
+            GetMaterial("GoldLuxury", new Color(0.88f, 0.70f, 0.15f), 0.85f, 0.2f);
+            GetMaterial("DarkMetal", new Color(0.18f, 0.18f, 0.20f), 0.7f, 0.3f);
+            GetMaterial("ChromeFinish", new Color(0.95f, 0.95f, 0.98f), 0.98f, 0.05f);
+            GetMaterial("MattePaintRed", new Color(0.75f, 0.12f, 0.12f), 0.1f, 0.9f);
+            GetMaterial("SatinPaintBlack", new Color(0.08f, 0.08f, 0.09f), 0.3f, 0.7f);
+            GetMaterial("MosqueMarbleWhite", new Color(0.95f, 0.95f, 0.92f), 0.2f, 0.3f);
+            GetMaterial("DesertSandstone", new Color(0.82f, 0.68f, 0.48f), 0.05f, 0.95f);
+            GetMaterial("NeonGoldEmissive", new Color(1.0f, 0.82f, 0.2f), 0.5f, 0.1f);
         }
 
         public static Material GetMaterial(string matName, Color defaultColor, float metallic = 0f, float smoothness = 0.5f)

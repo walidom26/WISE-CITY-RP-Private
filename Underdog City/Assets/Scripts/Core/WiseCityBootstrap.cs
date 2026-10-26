@@ -8,7 +8,7 @@ namespace UnderdogCity
         public static void OnGameStart()
         {
             Debug.Log("=========================================");
-            Debug.Log("🌐 WISE CITY RP — RUNTIME BOOTSTRAP INIT");
+            Debug.Log("🌐 WISE CITY RP — AAA MASTER BOOTSTRAP INIT");
             Debug.Log("=========================================");
 
             // 1. Ensure Main Camera exists
@@ -22,15 +22,15 @@ namespace UnderdogCity
                 camObj.transform.rotation = Quaternion.Euler(25, 0, 0);
             }
 
-            // 2. Instantiate Directional Sun Light
+            // 2. Instantiate Directional Sun Light & Ambient Lighting
             Light sunLight = Object.FindObjectOfType<Light>();
             if (sunLight == null)
             {
                 GameObject lightObj = new GameObject("Directional Light (Sun)");
                 Light lightComp = lightObj.AddComponent<Light>();
                 lightComp.type = LightType.Directional;
-                lightComp.intensity = 1.2f;
-                lightComp.color = new Color(1.0f, 0.95f, 0.85f);
+                lightComp.intensity = 1.25f;
+                lightComp.color = new Color(1.0f, 0.96f, 0.88f);
                 lightObj.transform.rotation = Quaternion.Euler(50, -30, 0);
             }
 
@@ -55,8 +55,9 @@ namespace UnderdogCity
             EnsureManager<WeatherAndEnvironmentManager>("WeatherAndEnvironmentManager");
             EnsureManager<SeamlessInteriorManager>("SeamlessInteriorManager");
             EnsureManager<ProximityVoiceSystem>("ProximityVoiceSystem");
+            EnsureManager<VehicleManager>("VehicleManager");
 
-            Debug.Log("✅ Wise City RP Runtime Bootstrap successfully initialized all core systems!");
+            Debug.Log("✅ Wise City RP Master Runtime Bootstrap initialized all 18 core game systems!");
         }
 
         private static T EnsureManager<T>(string name) where T : MonoBehaviour

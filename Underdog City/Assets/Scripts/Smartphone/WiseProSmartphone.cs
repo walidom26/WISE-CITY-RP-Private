@@ -20,6 +20,8 @@ namespace UnderdogCity
         public bool isPhoneOpen = false;
         public PhoneApp activeApp = PhoneApp.CentralBank;
 
+        private List<string> blockedNumbers = new List<string>();
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -32,9 +34,24 @@ namespace UnderdogCity
             Debug.Log("[WisePro Phone] UI state: " + (isPhoneOpen ? "OPEN" : "CLOSED"));
         }
 
+        public void SwitchApp(PhoneApp app)
+        {
+            activeApp = app;
+            Debug.Log("[WisePro Phone] Switched to App: " + app);
+        }
+
         public void SendPrivateSMS(int targetPlayerID, string smsBody)
         {
             ReceivePrivateSMSRpc(targetPlayerID, "المواطن", smsBody);
+        }
+
+        public void BlockNumber(string number)
+        {
+            if (!blockedNumbers.Contains(number))
+            {
+                blockedNumbers.Add(number);
+                Debug.Log("[WisePro Phone] Blocked contact: " + number);
+            }
         }
 
         void ReceivePrivateSMSRpc(int targetPlayerID, string senderName, string smsBody)

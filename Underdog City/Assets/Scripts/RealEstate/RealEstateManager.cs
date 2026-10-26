@@ -24,6 +24,7 @@ namespace UnderdogCity
             public Vector3 location;
             public bool isOwned;
             public bool hasPrivateGarage;
+            public List<string> guestAccessAccountIDs = new List<string>();
         }
 
         [Header("🏡 نظام العقارات والمرائب - Wise City Real Estate")]
@@ -54,6 +55,16 @@ namespace UnderdogCity
                 prop.isOwned = true;
                 HUDController.Instance.UpdatePlayerInfoUI();
                 Debug.Log("[WiseCity RealEstate] Purchased " + prop.propertyName + " for $" + prop.purchasePrice);
+            }
+        }
+
+        public void GrantGuestKey(int propertyID, string guestAccountID)
+        {
+            RealEstateProperty prop = availableProperties.Find(p => p.propertyID == propertyID);
+            if (prop != null && prop.isOwned && !prop.guestAccessAccountIDs.Contains(guestAccountID))
+            {
+                prop.guestAccessAccountIDs.Add(guestAccountID);
+                Debug.Log(string.Format("[WiseCity RealEstate] Granted guest key for property {0} to {1}", propertyID, guestAccountID));
             }
         }
     }
