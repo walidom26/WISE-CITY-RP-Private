@@ -8,7 +8,7 @@ namespace UnderdogCity
         public static void OnGameStart()
         {
             Debug.Log("=========================================");
-            Debug.Log("🌐 WISE CITY RP — AAA MASTER BOOTSTRAP INIT");
+            Debug.Log("🌐 WISE CITY RP — COMPLETE AAA BOOTSTRAP INIT");
             Debug.Log("=========================================");
 
             // 1. Ensure Main Camera exists
@@ -45,11 +45,16 @@ namespace UnderdogCity
             EnsureManager<PlayerController>("PlayerController");
             EnsureManager<VehicleController>("VehicleController");
             EnsureManager<AdminAndAntiCheatManager>("AdminAndAntiCheatManager");
+            EnsureManager<ServerAntiCheatValidator>("ServerAntiCheatValidator");
             EnsureManager<FinancialManager>("FinancialManager");
             EnsureManager<FactionManager>("FactionManager");
+            EnsureManager<DispatchManager>("DispatchManager");
+            EnsureManager<JudiciaryManager>("JudiciaryManager");
             EnsureManager<JobManager>("JobManager");
             EnsureManager<GangManager>("GangManager");
             EnsureManager<RealEstateManager>("RealEstateManager");
+            EnsureManager<InventoryManager>("InventoryManager");
+            EnsureManager<BusinessManager>("BusinessManager");
             EnsureManager<WiseProSmartphone>("WiseProSmartphone");
             EnsureManager<LandmarksManager>("LandmarksManager");
             EnsureManager<WeatherAndEnvironmentManager>("WeatherAndEnvironmentManager");
@@ -57,7 +62,7 @@ namespace UnderdogCity
             EnsureManager<ProximityVoiceSystem>("ProximityVoiceSystem");
             EnsureManager<VehicleManager>("VehicleManager");
 
-            Debug.Log("✅ Wise City RP Master Runtime Bootstrap initialized all 18 core game systems!");
+            Debug.Log("✅ Wise City RP Master Runtime Bootstrap initialized all 23 core game managers!");
         }
 
         private static T EnsureManager<T>(string name) where T : MonoBehaviour

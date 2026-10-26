@@ -10,17 +10,16 @@ namespace UnderdogCity
 
         [Header("📱 عناصر واجهة المستخدم HUD Elements")]
         public string currentDistrictName = "وسط المدينة (Downtown)";
-        public int playerID = 101;
-        public int playerXPLevel = 12;
+        public int playerID = 1001;
+        public int playerXPLevel = 15;
         public float healthAmount = 100f;
-        public float armorAmount = 50f;
-        public decimal pocketCash = 25000m;
-        public decimal bankBalance = 1500000m;
+        public float armorAmount = 100f;
+        public double pocketCash = 50000.0;
+        public double bankBalance = 250000.0;
 
         [Header("طبلون السرعة والوقود")]
         public float speedKMH = 0f;
-        public float fuelLevel = 85f;
-        public float tripDistanceKM = 14.2f;
+        public float fuelLevel = 100f;
 
         [Header("شات وايز سيتي - Chat Channels")]
         public List<string> chatNearbyMessages = new List<string>();
@@ -41,6 +40,15 @@ namespace UnderdogCity
 
         private void Update()
         {
+            if (HUDController.Instance != null)
+            {
+                pocketCash = HUDController.Instance.cash;
+                bankBalance = HUDController.Instance.bank;
+                playerXPLevel = HUDController.Instance.playerXP;
+                healthAmount = HUDController.Instance.health;
+                armorAmount = HUDController.Instance.armor;
+            }
+
             if (PlayerController.LocalPlayer != null)
             {
                 Vector3 pos = PlayerController.LocalPlayer.transform.position;
@@ -75,7 +83,6 @@ namespace UnderdogCity
 
         private void OnGUI()
         {
-            // Clean Luxury Gold & Dark OnGUI HUD Overlay for verification & gameplay
             GUI.backgroundColor = new Color(0.1f, 0.1f, 0.12f, 0.85f);
 
             // 1. Top-Left: Circular Minimap & District Name
