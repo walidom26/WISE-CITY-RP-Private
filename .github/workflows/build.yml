@@ -30,7 +30,7 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: "Underdog City"
-          unityVersion: 2018.3.0f2
+          unityVersion: 2022.3.62f3
           targetPlatform: Android
           androidExportType: androidPackage
 
