@@ -1,0 +1,216 @@
+name: Smoke Test SAMP Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-24.04
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MYSQL_ROOT_PASSWORD: ci_root_password
+          MYSQL_DATABASE: wise_city_db
+          MYSQL_USER: wisecity_user
+          MYSQL_PASSWORD: ci_test_password_123
+        ports:
+          - 3306:3306
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install 32-bit libraries (pawncc and server/plugins are 32-bit)
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y libc6:i386 libstdc++6:i386 zlib1g:i386 libssl-dev:i386 libssl3:i386 default-mysql-client jq curl
+
+      - name: Set up Database Schema
+        env:
+          CI_DB_PASS: ci_test_password_123
+        run: |
+          echo "Waiting for MariaDB service to be fully responsive..."
+          until mysqladmin ping -h 127.0.0.1 -u root -pci_root_password --silent; do
+            sleep 2
+          done
+          echo "Granting full privileges to wisecity_user..."
+          mysql -h 127.0.0.1 -u root -pci_root_password -e "GRANT ALL PRIVILEGES ON wise_city_db.* TO 'wisecity_user'@'%'; FLUSH PRIVILEGES;"
+          echo "Importing install.sql schema..."
+          mysql -h 127.0.0.1 -u wisecity_user -p"$CI_DB_PASS" wise_city_db < samp/database/install.sql
+          echo "Database import finished."
+
+      - name: Setup throwaway CI credentials in wc_secrets.inc
+        env:
+          CI_DB_PASS: ci_test_password_123
+        run: |
+          sed -i "s/CHANGE_ME_STRONG_PASSWORD/$CI_DB_PASS/g" samp/gamemodes/includes/wc_secrets.inc
+
+      - name: Download pawncc compiler
+        run: |
+          mkdir -p samp/tools && cd samp/tools
+          curl -fL -o pawncc.tgz https://github.com/pawn-lang/compiler/releases/download/v3.10.10/pawnc-3.10.10-linux.tar.gz
+          tar xzf pawncc.tgz
+
+      - name: Download include libraries
+        run: |
+          mkdir -p samp/libs && cd samp/libs
+          git clone --depth 1 https://github.com/openmultiplayer/omp-stdlib
+          git clone --depth 1 https://github.com/pBlueG/SA-MP-MySQL
+          curl -sL https://github.com/pBlueG/SA-MP-MySQL/releases/download/R41-4/mysql-R41-4-Debian.tar.gz | tar -xz -C SA-MP-MySQL/ --strip-components=3 mysql-R41-4-Debian/pawno/include/a_mysql.inc || true
+          git clone --depth 1 https://github.com/Y-Less/sscanf
+          git clone --depth 1 https://github.com/samp-incognito/samp-streamer-plugin
+          git clone --depth 1 https://github.com/urShadow/Pawn.CMD
+          git clone --depth 1 https://github.com/Sreyas-Sreelal/samp-bcrypt
+
+      - name: Compile Gamemode
+        run: |
+          WS="$GITHUB_WORKSPACE"
+          mkdir -p "$WS/samp/build"
+          PAWNCC=$(find "$WS/samp/tools" -name pawncc -type f | head -1)
+          chmod +x "$PAWNCC"
+          BIN_DIR="$(dirname "$PAWNCC")"
+          LIB_DIR="$(dirname "$BIN_DIR")/lib"
+          export LD_LIBRARY_PATH="$LIB_DIR:$BIN_DIR":$LD_LIBRARY_PATH
+          INCS=""
+          for d in $(find "$WS/samp/libs" -name "*.inc" -printf "%h\n" | sort -u); do INCS="$INCS -i$d"; done
+          cd "$WS/samp/gamemodes"
+          set +e
+          "$PAWNCC" wise_city.pwn -o"$WS/samp/build/wise_city.amx" $INCS -d3 > "$WS/samp/build/compile.log" 2>&1
+          CODE=$?
+          echo "exit code: $CODE" >> "$WS/samp/build/compile.log"
+          tail -n 60 "$WS/samp/build/compile.log"
+          if [ $CODE -ne 0 ]; then
+            echo "Gamemode compilation failed with exit code $CODE"
+            exit $CODE
+          fi
+
+      - name: Setup open.mp Server & Plugins
+        run: |
+          mkdir -p openmp-server/gamemodes openmp-server/plugins openmp-server/components
+          cd openmp-server
+
+          echo "Downloading latest open.mp linux server..."
+          OMP_URL=$(curl -s https://api.github.com/repos/openmultiplayer/open.mp/releases/latest | jq -r '.assets[] | select(.name | test("open\\.mp-linux-x86.*\\.tar\\.gz$")) | .browser_download_url' | head -1)
+          echo "open.mp URL: $OMP_URL"
+          curl -fL -o openmp.tar.gz "$OMP_URL"
+          tar xzf openmp.tar.gz
+
+          echo "Downloading sscanf plugin..."
+          SSCANF_URL=$(curl -s https://api.github.com/repos/Y-Less/sscanf/releases/latest | jq -r '.assets[] | select(.name | test(".*-linux\\.tar\\.gz$")) | .browser_download_url' | head -1)
+          echo "sscanf URL: $SSCANF_URL"
+          curl -fL -o sscanf.tar.gz "$SSCANF_URL"
+          tar xzf sscanf.tar.gz
+          find . -name "sscanf.so" -exec cp {} plugins/ \;
+
+          echo "Downloading MySQL R41-4 plugin..."
+          MYSQL_URL=$(curl -s https://api.github.com/repos/pBlueG/SA-MP-MySQL/releases/tags/R41-4 | jq -r '.assets[] | select(.name | test("mysql-.*-Debian-static\\.tar\\.gz$")) | .browser_download_url' | head -1)
+          echo "mysql URL: $MYSQL_URL"
+          curl -fL -o mysql.tar.gz "$MYSQL_URL"
+          tar xzf mysql.tar.gz
+          find . -name "mysql.so" -exec cp {} plugins/ \;
+
+          echo "Downloading streamer plugin..."
+          STREAMER_URL=$(curl -s https://api.github.com/repos/samp-incognito/samp-streamer-plugin/releases/latest | jq -r '.assets[] | select(.name == "samp-streamer-plugin-2.9.6.zip") | .browser_download_url' | head -1)
+          echo "streamer URL: $STREAMER_URL"
+          curl -fL -o streamer.zip "$STREAMER_URL"
+          unzip -o streamer.zip
+          find . -name "streamer.so" -exec cp {} plugins/ \;
+
+          echo "Downloading samp-bcrypt plugin..."
+          BCRYPT_URL=$(curl -s https://api.github.com/repos/Sreyas-Sreelal/samp-bcrypt/releases/latest | jq -r '.assets[] | select(.name | test(".*-linux-x86\\.zip$")) | .browser_download_url' | head -1)
+          echo "bcrypt URL: $BCRYPT_URL"
+          curl -fL -o bcrypt.zip "$BCRYPT_URL"
+          unzip -o bcrypt.zip
+          find . -name "samp-bcrypt.so" -o -name "bcrypt.so" -exec cp {} plugins/ \;
+
+          echo "Downloading Pawn.CMD component/plugin..."
+          PCMD_URL=$(curl -s https://api.github.com/repos/katursis/Pawn.CMD/releases/latest | jq -r '.assets[] | select(.name | test(".*-omp-linux\\.tar\\.gz$")) | .browser_download_url' | head -1)
+          echo "Pawn.CMD URL: $PCMD_URL"
+          curl -fL -o pcmd.tar.gz "$PCMD_URL"
+          tar xzf pcmd.tar.gz
+          find . -name "*pawncmd*.so" -exec cp {} components/ \; || true
+
+          cp "$GITHUB_WORKSPACE/samp/build/wise_city.amx" gamemodes/
+
+          cat << 'EOF' > config.json
+          {
+            "name": "WISE-CITY-RP | CI Smoke Test",
+            "language": "Arabic",
+            "max_players": 50,
+            "password": "",
+            "game": { "mode": "Roleplay" },
+            "network": { "port": 7777 },
+            "rcon": { "enable": false },
+            "pawn": {
+              "main_scripts": [ "wise_city 1" ],
+              "legacy_plugins": [ "sscanf", "mysql", "samp_bcrypt", "samp-bcrypt", "streamer" ]
+            }
+          }
+          EOF
+
+      - name: Run open.mp Server Smoke Test (60 Seconds)
+        run: |
+          cd openmp-server
+          SERVER_BIN=$(find . -maxdepth 2 -name "omp-server" -o -name "open.mp" -type f | head -1)
+          if [ -z "$SERVER_BIN" ]; then
+            echo "Error: open.mp server binary not found!"
+            ls -la
+            exit 1
+          fi
+          chmod +x "$SERVER_BIN"
+          echo "Starting server: $SERVER_BIN"
+          "$SERVER_BIN" > server_console.log 2>&1 &
+          PID=$!
+
+          echo "Server running with PID $PID. Waiting for 60 seconds..."
+          sleep 60
+
+          echo "Checking if server process is still alive..."
+          if kill -0 $PID 2>/dev/null; then
+            echo "Server is still running smoothly after 60 seconds."
+            kill -TERM $PID 2>/dev/null || true
+            sleep 3
+            kill -KILL $PID 2>/dev/null || true
+          else
+            echo "Server process exited prematurely."
+            wait $PID || true
+            EXIT_CODE=$?
+            echo "Server exit code: $EXIT_CODE"
+            cat server_console.log
+            exit 1
+          fi
+
+      - name: Check and Assert Server Log
+        run: |
+          cd openmp-server
+          LOG_FILE="server_console.log"
+          if [ -f "server_log.txt" ]; then
+            LOG_FILE="server_log.txt"
+          elif [ -f "logs/server.log" ]; then
+            LOG_FILE="logs/server.log"
+          elif [ -f "log.txt" ]; then
+            LOG_FILE="log.txt"
+          fi
+          echo "Selected log file: $LOG_FILE"
+          echo "=== LAST 100 LINES OF SERVER LOG ==="
+          tail -n 100 "$LOG_FILE"
+          echo "====================================="
+
+          if grep -E -i "Database connection failed|FATAL|Server crashed|Segmentation fault" "$LOG_FILE"; then
+            echo "Smoke test FAILED: Critical error detected in server log."
+            exit 1
+          fi
+          echo "Smoke test PASSED: Server ran for 60 seconds without fatal database or crash errors."
+
+      - name: Upload Server Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openmp-smoke-test-logs
+          path: |
+            openmp-server/*.log
+            openmp-server/*.txt
+            openmp-server/logs/
+            samp/build/compile.log

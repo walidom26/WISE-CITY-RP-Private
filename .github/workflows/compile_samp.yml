@@ -1,0 +1,58 @@
+name: Compile SAMP gamemode
+
+on:
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install 32-bit libraries (pawncc is 32-bit)
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y libc6:i386 libstdc++6:i386 zlib1g:i386
+
+      - name: Download pawncc
+        run: |
+          mkdir -p samp/tools && cd samp/tools
+          curl -fL -o pawncc.tgz https://github.com/pawn-lang/compiler/releases/download/v3.10.10/pawnc-3.10.10-linux.tar.gz
+          tar xzf pawncc.tgz
+          find . -name pawncc -type f
+
+      - name: Download include libraries
+        run: |
+          mkdir -p samp/libs && cd samp/libs
+          git clone --depth 1 https://github.com/openmultiplayer/omp-stdlib
+          git clone --depth 1 https://github.com/pBlueG/SA-MP-MySQL
+          curl -sL https://github.com/pBlueG/SA-MP-MySQL/releases/download/R41-4/mysql-R41-4-Debian.tar.gz | tar -xz -C SA-MP-MySQL/ --strip-components=3 mysql-R41-4-Debian/pawno/include/a_mysql.inc || true
+          git clone --depth 1 https://github.com/Y-Less/sscanf
+          git clone --depth 1 https://github.com/samp-incognito/samp-streamer-plugin
+          git clone --depth 1 https://github.com/urShadow/Pawn.CMD
+          git clone --depth 1 https://github.com/Sreyas-Sreelal/samp-bcrypt
+
+      - name: Compile
+        run: |
+          WS="$GITHUB_WORKSPACE"
+          mkdir -p "$WS/samp/build"
+          PAWNCC=$(find "$WS/samp/tools" -name pawncc -type f | head -1)
+          chmod +x "$PAWNCC"
+          BIN_DIR="$(dirname "$PAWNCC")"
+          LIB_DIR="$(dirname "$BIN_DIR")/lib"
+          export LD_LIBRARY_PATH="$LIB_DIR:$BIN_DIR":$LD_LIBRARY_PATH
+          INCS=""
+          for d in $(find "$WS/samp/libs" -name "*.inc" -printf "%h\n" | sort -u); do INCS="$INCS -i$d"; done
+          cd "$WS/samp/gamemodes"
+          set +e
+          "$PAWNCC" wise_city.pwn -o"$WS/samp/build/wise_city.amx" $INCS -d3 > "$WS/samp/build/compile.log" 2>&1
+          echo "exit code: $?" >> "$WS/samp/build/compile.log"
+          tail -n 80 "$WS/samp/build/compile.log"
+
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compile-result
+          path: samp/build/

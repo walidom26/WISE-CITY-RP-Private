@@ -1,0 +1,14 @@
+{
+  "name": "WISE-CITY-RP | Arabic Roleplay",
+  "language": "Arabic",
+  "website": "wise-city-rp.com",
+  "max_players": 100,
+  "password": "",
+  "game": { "mode": "Roleplay" },
+  "network": { "port": 7777 },
+  "rcon": { "enable": true, "password": "CHANGE_ME_RCON_PASSWORD" },
+  "pawn": {
+    "main_scripts": [ "wise_city 1" ],
+    "legacy_plugins": [ "sscanf", "mysql", "samp_bcrypt", "streamer" ]
+  }
+}

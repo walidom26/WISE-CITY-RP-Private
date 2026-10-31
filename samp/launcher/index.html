@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#07070a">
+<title>WISE CITY RP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<div id="splash" class="splash">
+  <img src="assets/logo.jpg" alt="WISE CITY" class="splash-logo">
+  <div class="splash-bar"><i></i></div>
+</div>
+
+<main id="app" class="app" hidden>
+  <header class="top">
+    <div class="brand">
+      <img src="assets/logo.jpg" alt="" class="brand-logo">
+      <div class="brand-text"><b>WISE CITY</b><span>ROLEPLAY</span></div>
+    </div>
+    <div class="owner"><span>المالك</span><b>walid om</b></div>
+  </header>
+
+  <section class="hero">
+    <p class="eyebrow">مجتمع الـ Roleplay العربي الأفخم</p>
+    <h1>مدينتك.<em>قصتك.</em> قوانينك.</h1>
+    <p class="lead">اقتصاد حقيقي، فصائل، عصابات، مزادات سيارات، منازل وهاتف ذكي — كل شيء في مدينة واحدة.</p>
+  </section>
+
+  <section class="stats">
+    <div class="chip"><small>اللاعبون</small><b id="players">—</b></div>
+    <div class="chip"><small>الحالة</small><b id="status">غير معروفة</b></div>
+    <div class="chip"><small>الإصدار</small><b>2.0</b></div>
+  </section>
+
+  <section class="card">
+    <label for="nick">اسم الشخصية</label>
+    <input id="nick" type="text" maxlength="24" placeholder="Firstname_Lastname" autocomplete="off" spellcheck="false">
+    <small id="nickHint" class="hint">صيغة الاسم: حروف إنجليزية، اسم أول وأخير بينهما _</small>
+
+    <div class="row">
+      <div><label for="ip">العنوان</label><input id="ip" type="text" inputmode="url" dir="ltr"></div>
+      <div class="port"><label for="port">المنفذ</label><input id="port" type="number" dir="ltr"></div>
+    </div>
+
+    <button id="connect" class="btn gold">دخول المدينة</button>
+    <div class="links">
+      <button id="rulesBtn" class="btn ghost">القوانين</button>
+      <button id="discordBtn" class="btn ghost">ديسكورد</button>
+      <button id="settingsBtn" class="btn ghost">الإعدادات</button>
+    </div>
+    <p id="msg" class="msg" role="status"></p>
+  </section>
+
+  <footer class="foot">© WISE CITY RP — جميع الحقوق محفوظة</footer>
+</main>
+
+<div id="modal" class="modal" hidden>
+  <div class="sheet">
+    <h2 id="mTitle"></h2>
+    <div id="mBody"></div>
+    <button id="mClose" class="btn gold">إغلاق</button>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
